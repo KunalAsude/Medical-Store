@@ -6,13 +6,13 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: linear-gradient(to right, #042F2E, #012621, #002A1C);
   --foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: linear-gradient(to right, #0D1B1E, #092327, #04191A);
     --foreground: #ededed;
   }
 }
@@ -21,4 +21,45 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  background-attachment: fixed;
+  background-size: cover;
+  /* Add smooth scrolling to the body */
+  scroll-behavior: smooth;
+}
+
+/* Complete removal of scrollbars while maintaining functionality */
+/* For Webkit browsers (Chrome, Safari, newer Edge) */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* For Internet Explorer/Edge */
+* {
+  -ms-overflow-style: none;
+}
+
+/* Ensure smooth scrolling works globally */
+html {
+  scroll-behavior: smooth;
+}
+
+/* For any element with the scrollbar class */
+.scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+.admin-header {
+  @apply sticky top-0 z-20 text-teal-300  flex items-center justify-between bg-gradient-to-r from-[#003e34] to-[#003e34]
+  px-[5%] py-0 shadow-lg xl:px-12;
 }
