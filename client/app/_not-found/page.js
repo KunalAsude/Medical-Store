@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 
 // Main component
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
     <Suspense fallback={<NotFoundLoading />}>
       <NotFoundContent />
