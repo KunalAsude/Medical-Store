@@ -4,8 +4,33 @@ import Link from "next/link"
 import { ShoppingBag, ArrowRight } from "lucide-react"
 import CartItem from "@/components/CartItem"
 import { useCart } from "@/context/CartContext"
+import { Suspense } from "react"
 
+// Main component that uses Suspense
 export default function CartPage() {
+  return (
+    <Suspense fallback={<CartLoading />}>
+      <CartContent />
+    </Suspense>
+  )
+}
+
+// Loading component
+function CartLoading() {
+  return (
+    <div className="container mx-auto px-4 py-16 text-center">
+      <div className="animate-pulse">
+        <div className="h-16 w-16 mx-auto bg-gray-200 rounded-full mb-4"></div>
+        <div className="h-8 bg-gray-200 max-w-md mx-auto mb-4 rounded"></div>
+        <div className="h-4 bg-gray-200 max-w-sm mx-auto mb-8 rounded"></div>
+        <div className="h-12 bg-gray-200 max-w-xs mx-auto rounded"></div>
+      </div>
+    </div>
+  )
+}
+
+// Cart content component that uses the context
+function CartContent() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart()
 
   if (items.length === 0) {
@@ -87,4 +112,3 @@ export default function CartPage() {
     </div>
   )
 }
-

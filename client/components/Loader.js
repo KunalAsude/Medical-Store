@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 
 const Loader = () => {
@@ -63,7 +63,20 @@ const Loader = () => {
 }
 
 // Add loading functionality to export both the Loader component and a loading wrapper
+
+// ... your Loader component code ...
+
+// Modified LoadingWrapper with Suspense
 export const LoadingWrapper = ({ children }) => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <LoadingContent>{children}</LoadingContent>
+    </Suspense>
+  );
+};
+
+// Internal component that uses hooks requiring Suspense
+const LoadingContent = ({ children }) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
@@ -88,7 +101,7 @@ export const LoadingWrapper = ({ children }) => {
       
       return () => clearTimeout(timer)
     }
-  }, [pathname, searchParams])
+  }, [pathname, searchParams, isLoading])
 
   return (
     <>
@@ -97,7 +110,7 @@ export const LoadingWrapper = ({ children }) => {
         {children}
       </div>
     </>
-  )
-}
+  );
+};
 
 export default Loader
