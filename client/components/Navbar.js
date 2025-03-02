@@ -57,7 +57,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="admin-header">
+    <header className="admin-header ">
       <div className="container mx-auto ">
         <div className="flex items-center  justify-between h-16">
           <Link href="/" className="font-bold text-lg text-primary">

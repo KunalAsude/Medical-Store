@@ -60,6 +60,7 @@ html {
 }
 
 .admin-header {
-  @apply sticky top-0 z-20 text-teal-300  flex items-center justify-between bg-gradient-to-r from-[#003e34] to-[#003e34]
-  px-[5%] py-0 shadow-lg xl:px-12;
+  @apply sticky top-0 z-20 text-teal-300 flex items-center justify-between 
+         bg-gradient-to-r from-[#003e34] to-[#003e34] 
+         px-[5%] py-0 shadow-lg xl:px-12;
 }
