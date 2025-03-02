@@ -61,16 +61,16 @@ export default function Navbar() {
       <div className="container mx-auto ">
         <div className="flex items-center  justify-between h-16">
           <Link href="/" className="font-bold text-lg text-primary">
-          <div className="flex items-center gap-1">
-          <img
-              src="https://img.icons8.com/arcade/64/hospital.png"
-              alt="MediNexus Logo"
-              height="100px"
-              width="100px"
-              className="h-10 w-fit"
-            />
-            <div>MediStore</div>
-          </div>
+            <div className="flex items-center gap-1">
+              <Image
+                src="https://img.icons8.com/arcade/64/hospital.png"
+                alt="MediNexus Logo"
+                width={50}   // ✅ Correct (numeric value)
+                height={50}  // ✅ Correct (numeric value)
+              />
+
+              <div>MediStore</div>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -86,7 +86,7 @@ export default function Navbar() {
                 <div className="p-2">
                   {categories.map((category) => (
                     <div key={category.name} className="relative group/subcategory">
-                      <Link 
+                      <Link
                         href={category.path}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
                       >
@@ -95,7 +95,7 @@ export default function Navbar() {
                       <div className="absolute left-full top-0 ml-1 w-64 bg-white shadow-lg rounded-md opacity-0 invisible group-hover/subcategory:opacity-100 group-hover/subcategory:visible transition-all duration-300">
                         <div className="p-2">
                           {category.subcategories.map((subcategory) => (
-                            <Link 
+                            <Link
                               key={subcategory.name}
                               href={subcategory.path}
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
@@ -130,7 +130,7 @@ export default function Navbar() {
               <User className="h-6 w-6" />
             </Link>
 
-            <button 
+            <button
               className="md:hidden text-gray-700"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -143,7 +143,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link 
+            <Link
               href="/"
               className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
               onClick={() => setMobileMenuOpen(false)}
@@ -153,7 +153,7 @@ export default function Navbar() {
 
             {categories.map((category) => (
               <div key={category.name}>
-                <button 
+                <button
                   className="flex items-center justify-between w-full px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
                   onClick={() => toggleCategory(category.name)}
                 >
@@ -164,7 +164,7 @@ export default function Navbar() {
                 {openCategory === category.name && (
                   <div className="pl-6 space-y-1">
                     {category.subcategories.map((subcategory) => (
-                      <Link 
+                      <Link
                         key={subcategory.name}
                         href={subcategory.path}
                         className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
@@ -178,14 +178,14 @@ export default function Navbar() {
               </div>
             ))}
 
-            <Link 
+            <Link
               href="/products"
               className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
               onClick={() => setMobileMenuOpen(false)}
             >
               All Products
             </Link>
-            <Link 
+            <Link
               href="/contact"
               className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md"
               onClick={() => setMobileMenuOpen(false)}

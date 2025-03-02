@@ -76,7 +76,7 @@ export const LoadingWrapper = ({ children }) => {
     }, 1200)
     
     return () => clearTimeout(timer)
-  }, [])
+  }, [pathname])
   
   // Navigation change effect
   useEffect(() => {
