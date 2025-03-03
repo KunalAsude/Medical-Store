@@ -1,26 +1,36 @@
-'use client'
-import { Suspense, useEffect, useState } from "react";
-import ProductCard from "@/components/ProductCard";
-import { Filter, ChevronDown, SlidersHorizontal, X } from "lucide-react";
-import { getAllProducts } from "@/lib/actions/productActions";
-import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+"use client"
 
+import { useEffect, useState } from "react"
+import { Filter, X, SlidersHorizontal } from "lucide-react"
+import ProductCard from "@/components/ProductCard"
+import { useParams } from "next/navigation"
+import { getCategoryById, getProductsByCategory } from "@/lib/actions/categoryActions"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 
+export default function CategoryPage({ params }) {
+  const { id } = useParams() // Get category ID from URL
+  const [products, setProducts] = useState([])
+  const [category, setCategory] = useState({})
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  const [sortOption, setSortOption] = useState("popularity")
+  const [filteredProducts, setFilteredProducts] = useState([])
+  const [result, setResult] = useState(products)
 
-export default function ProductsPage() {
+  useEffect(() => {
+    if (id) {
+      getProductsByCategory(id).then(setProducts)
+      getCategoryById(id).then(setCategory)
+    }
+  }, [id])
 
-  const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     subcategories: [],
     priceRanges: [],
     brands: [],
   })
-  const [sortOption, setSortOption] = useState("popularity")
 
-  useEffect(() => {
-    getAllProducts().then((data) => setProducts(data));
-  }, []);
+  
 
   const handleFilterChange = (type, value) => {
     setFilters((prev) => {
@@ -53,6 +63,7 @@ export default function ProductsPage() {
     }
   }
 
+  // Filter content component to reuse in both desktop and mobile views
   const FilterContent = ({ onApply }) => (
     <>
       <div className="flex items-center mb-6">
@@ -77,8 +88,8 @@ export default function ProductsPage() {
           >
             <option value="">All Brands</option>
             {products?.map((product) => (
-              <option key={product?.brand} value={product?.brand}>
-                {product?.brand}
+              <option key={product?.brand} value={products?.brand}>
+                {products?.brand}
               </option>
             ))}
           </select>
@@ -137,11 +148,12 @@ export default function ProductsPage() {
       </button>
     </>
   )
+
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-4.5rem)] overflow-hidden">
       {/* Mobile Filter Button */}
       <div className="md:hidden sticky top-0 z-10 bg-teal-950 p-4 border-b border-gray-800 flex justify-between items-center">
-        <h1 className="text-xl font-bold">All Products</h1>
+        <h1 className="text-xl font-bold">{category?.name || "Category"}</h1>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="bg-teal-900 border-gray-700">
@@ -161,7 +173,7 @@ export default function ProductsPage() {
                 </SheetClose>
               </div>
               <div className="flex-1 overflow-y-auto px-1">
-                <FilterContent onApply={() => { }} />
+                <FilterContent onApply={() => {}} />
               </div>
               <div className="mt-auto pt-4 border-t border-gray-800">
                 <SheetClose asChild>
@@ -177,7 +189,7 @@ export default function ProductsPage() {
       <div className="hidden md:flex md:w-1/4 lg:w-1/5 bg-teal-950 border-r border-gray-900 flex-col h-full">
         {/* Category name at top of sidebar */}
         <div className="p-6 border-b border-gray-800">
-          <h1 className="text-2xl font-bold">All Products</h1>
+          <h1 className="text-2xl font-bold">{category?.name || "Category"}</h1>
         </div>
 
         {/* Filters section */}
@@ -215,7 +227,7 @@ export default function ProductsPage() {
         )}
 
         {/* Pagination */}
-        {products && products.length > 0 && (
+        {filteredProducts && filteredProducts.length > 0 && (
           <div className="mt-8 flex justify-center">
             <nav className="flex items-center space-x-2">
               <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-500 hover:bg-gray-50">
@@ -231,5 +243,6 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
-  );
+  )
 }
+

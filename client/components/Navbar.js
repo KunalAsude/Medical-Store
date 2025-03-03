@@ -1,12 +1,20 @@
 "use client"
 
-import React from "react"
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink, Shield } from "lucide-react"
+import {
+  ShoppingCart,
+  User,
+  Menu,
+  ChevronDown,
+  ChevronRight,
+  Home,
+  Package,
+  Phone,
+  ExternalLink,
+  Shield,
+} from "lucide-react"
 import Image from "next/image"
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,74 +24,60 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
-
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { getAllCategories } from "@/lib/actions/categoryActions"
 
-const categories = [
-  {
-    name: "Medicines",
-    path: "/products/medicines",
-    icon: <Package className="h-4 w-4 mr-2" />,
-    subcategories: [
-      { name: "Pain Relief", path: "/products/medicines/pain-relief" },
-      { name: "Cold & Flu", path: "/products/medicines/cold-flu" },
-      { name: "Allergy", path: "/products/medicines/allergy" },
-      { name: "Digestive Health", path: "/products/medicines/digestive-health" },
-      { name: "First Aid", path: "/products/medicines/first-aid" },
-    ],
-  },
-  {
-    name: "Devices",
-    path: "/products/devices",
-    icon: <Package className="h-4 w-4 mr-2" />,
-    subcategories: [
-      { name: "Blood Pressure Monitors", path: "/products/devices/blood-pressure" },
-      { name: "Thermometers", path: "/products/devices/thermometers" },
-      { name: "Glucose Monitors", path: "/products/devices/glucose-monitors" },
-      { name: "Nebulizers", path: "/products/devices/nebulizers" },
-      { name: "Medical Accessories", path: "/products/devices/accessories" },
-    ],
-  },
-  {
-    name: "Personal Care",
-    path: "/products/personal-care",
-    icon: <Package className="h-4 w-4 mr-2" />,
-    subcategories: [
-      { name: "Skin Care", path: "/products/personal-care/skin-care" },
-      { name: "Oral Care", path: "/products/personal-care/oral-care" },
-      { name: "Eye Care", path: "/products/personal-care/eye-care" },
-    ],
-  },
-  {
-    name: "Vitamins & Supplements",
-    path: "/products/vitamins-supplements",
-    icon: <Package className="h-4 w-4 mr-2" />,
-    subcategories: [
-      { name: "Multivitamins", path: "/products/vitamins-supplements/multivitamins" },
-      { name: "Minerals", path: "/products/vitamins-supplements/minerals" },
-      { name: "Herbal Supplements", path: "/products/vitamins-supplements/herbal" },
-    ],
-  },
-]
+// Data transformation function
+const transformCategories = (categories) => {
+  const categoryMap = {}
+
+  // Create a map of categories
+  categories.forEach((category) => {
+    if (!category.parentCategory) {
+      categoryMap[category._id] = {
+        ...category,
+        subcategories: [],
+      }
+    }
+  })
+
+  // Add subcategories to their parent categories
+  categories.forEach((category) => {
+    if (category.parentCategory) {
+      if (categoryMap[category.parentCategory]) {
+        categoryMap[category.parentCategory].subcategories.push(category)
+      }
+    }
+  })
+
+  // Convert the map back to an array
+  return Object.values(categoryMap)
+}
 
 export default function Navbar() {
   const [openCategory, setOpenCategory] = useState(null)
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    const get = async () => {
+      const data = await getAllCategories()
+      const transformedCategories = transformCategories(data)
+      setCategories(transformedCategories)
+    }
+    get()
+  }, [])
 
   const toggleCategory = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName)
   }
 
   return (
-    <header className=" sticky top-0 z-50 w-full border-b border-b-gray-900 bg-teal-950 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      <div className="container flex h-18 items-center justify-between mg:flex md:justify-between md:gap-10">
+    <header className="sticky top-0 z-50 w-full border-b border-b-gray-900 bg-teal-950 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-[4.5rem] items-center justify-between mg:flex md:justify-between md:gap-10">
         <div className="flex items-center gap-3 ml-5">
           <Link href="/" className="flex items-center gap-2">
             <Image
@@ -104,18 +98,16 @@ export default function Navbar() {
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className={`${navigationMenuTriggerStyle()}  text-white hover:bg-teal-900`}
-                >
+                <NavigationMenuLink className={`${navigationMenuTriggerStyle()}  text-white hover:bg-teal-900`}>
                   <Home className="h-4 w-4 mr-2" />
                   Home
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
 
-            <NavigationMenuItem >
+            <NavigationMenuItem>
               <div className="mt-4 border-0 cursor-pointer">
-                <NavigationMenuTrigger >
+                <NavigationMenuTrigger>
                   <Package className="h-4 w-4 mr-2 text-white" />
                   <p className="text-white">Categories</p>
                 </NavigationMenuTrigger>
@@ -123,20 +115,20 @@ export default function Navbar() {
               <NavigationMenuContent className="border-0 border-gray-900 bg-teal-900 rounded-lg shadow-lg">
                 <ul className="grid w-[400px] gap-3 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] border-0 bg-teal-900 rounded-xl shadow-lg">
                   {categories.map((category) => (
-                    <li key={category.name} className="row-span-3">
+                    <li key={category._id} className="row-span-3">
                       <NavigationMenuLink asChild>
                         <Link
-                          href={category.path}
+                          href={`/category/${category._id}`}
                           className="flex h-full w-full select-none flex-col justify-end rounded-md p-5 no-underline outline-none focus:shadow-md hover:shadow-md transition-all duration-200 hover:bg-teal-800"
                         >
                           <div className="mb-2 mt-2 text-lg font-medium text-black">{category.name}</div>
                           <div className="text-sm leading-tight text-white">
                             <ul className="space-y-1.5">
                               {category.subcategories.map((subcategory) => (
-                                <li key={subcategory.name}>
+                                <li key={subcategory._id}>
                                   <Link
-                                    href={subcategory.path}
-                                    className="text-sm hover:underline  flex items-center"
+                                    href={`/category/${subcategory._id}`}
+                                    className="text-sm hover:underline flex items-center"
                                   >
                                     <ChevronRight className="h-3 w-3 mr-1 text-black" />
                                     {subcategory.name}
@@ -155,9 +147,7 @@ export default function Navbar() {
 
             <NavigationMenuItem>
               <Link href="/products" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className={`${navigationMenuTriggerStyle()} text-white hover:bg-teal-900`}
-                >
+                <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-white hover:bg-teal-900`}>
                   <Package className="h-4 w-4 mr-2" />
                   All Products
                 </NavigationMenuLink>
@@ -166,36 +156,11 @@ export default function Navbar() {
 
             <NavigationMenuItem>
               <Link href="/contact" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className={`${navigationMenuTriggerStyle()} text-white hover:bg-teal-900`}
-                >
+                <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-white hover:bg-teal-900`}>
                   <Phone className="h-4 w-4 mr-2" />
                   Contact
                 </NavigationMenuLink>
               </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className=" mt-4 bg-teal-900"
-                  >
-                    
-                    <span>MediNexus</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Link href="/medinexus" className="flex items-center w-full">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Go to MediNexus
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu> */}
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -224,7 +189,6 @@ export default function Navbar() {
               <span className="sr-only">Admin Panel</span>
             </Button>
           </Link>
-
 
           {/* Mobile Menu */}
           <Sheet>
@@ -263,14 +227,13 @@ export default function Navbar() {
                   </SheetClose>
 
                   {categories.map((category) => (
-                    <Collapsible key={category.name} className="w-full">
+                    <Collapsible key={category._id} className="w-full">
                       <div className="flex items-center justify-between">
                         <SheetClose asChild>
                           <Link
-                            href={category.path}
+                            href={`/category/${category._id}`}
                             className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-teal-800 flex-1 text-white"
                           >
-                            {React.cloneElement(category.icon, { className: "h-4 w-4 text-white mr-2" })}
                             {category.name}
                           </Link>
                         </SheetClose>
@@ -283,9 +246,9 @@ export default function Navbar() {
                       <CollapsibleContent>
                         <div className="pl-8 space-y-1 mt-1">
                           {category.subcategories.map((subcategory) => (
-                            <SheetClose key={subcategory.name} asChild>
+                            <SheetClose key={subcategory._id} asChild>
                               <Link
-                                href={subcategory.path}
+                                href={`/category/${subcategory._id}`}
                                 className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-teal-800 text-white"
                               >
                                 <ChevronRight className="h-3 w-3 text-cyan-500" />

@@ -8,7 +8,7 @@ export default function ProductCard({ id, name, price, image, category, onAddToC
     <div className="bg-teal-950  rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <Link href={`/products/${id}`}>
         <div className="relative h-64">
-          <Image src={image || "/placeholder.svg"} alt={name} fill className="object-contain p-4" />
+          <Image src={image || "/placeholder.svg"} alt={name} fill className="object-contain p-4" unoptimized/>
         </div>
         <div className="p-4">
           {/* <span className="text-sm text-gray-300">{category}</span> */}

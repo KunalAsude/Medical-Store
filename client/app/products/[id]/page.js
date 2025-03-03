@@ -1,55 +1,74 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { FaStar } from 'react-icons/fa';
+import Loader from '@/components/Loader';
 
 export default function ProductPage() {
+  const { id } = useParams(); 
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const maxQuantity = 10;
-  const product = {
-    name: 'Pain Reliever',
-    description: 'Effective pain relief medication.',
-    price: 15.99,
-    imageUrl: '/images/pain-reliever.jpg',
-    rating: 4.5,
-    reviews: 120,
-  };
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
+        if (!res.ok) throw new Error('Failed to fetch product');
+        const data = await res.json();
+        setProduct(data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProduct();
+  }, [id]);
+
+  if (loading) return <Loader />;
+  if (!product) return <p className="text-center mt-10 text-red-600">Product not found.</p>;
 
   return (
-    <div className="container mx-auto p-6 grid md:grid-cols-2 gap-8">
-      <div className="relative w-full h-96">
-        <Image src={product.imageUrl} alt={product.name} layout="fill" objectFit="cover" className="rounded-lg" />
+    <div className="container mx-auto p-6">
+    <div className="overflow-hidden mx-auto p-6 grid md:grid-cols-2 gap-8">
+      {/* ✅ Product Image */}
+      <div className="relative w-full h-150 bg-teal-900 overflow-hidden">
+        <Image src={product.images?.[0] || '/fallback.jpg'} alt={product.name} layout="fill" objectFit="cover" className="rounded-lg" />
       </div>
-      <div>
-        <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-        <p className="text-gray-700 mb-4">{product.description}</p>
-        <div className="flex items-center mb-4">
+
+      {/* ✅ Product Details */}
+      <div className='flex flex-col justify-start space-y-3'>
+        <h1 className="text-2xl font-bold mb-5">{product.name}</h1>
+        <p className="text-gray-400 mb-5">{product.description}</p>
+
+        {/* ✅ Star Rating */}
+        <div className="flex items-center mb-5">
           {[...Array(5)].map((_, i) => (
-            <FaStar key={i} className={`text-${i < Math.round(product.rating) ? 'yellow' : 'gray'}-400`} />
+            <FaStar key={i} className={`text-${i < Math.round(product.averageRating) ? 'bg-amber-400' : 'gray'}-400`} />
           ))}
-          <span className="ml-2 text-gray-600">({product.reviews} reviews)</span>
+          <span className="ml-2 text-amber-300">({product.reviewCount} reviews)</span>
         </div>
-        <p className="text-xl font-semibold text-green-600">${product.price.toFixed(2)}</p>
-        <div className="flex items-center mt-4">
-          <Button
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            disabled={quantity === 1}
-          >
-            -
-          </Button>
-          <span className="mx-4 text-lg">{quantity}</span>
-          <Button
-            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-            disabled={quantity === maxQuantity}
-          >
-            +
-          </Button>
+
+        {/* ✅ Price */}
+        <p className="text-xl font-semibold text-green-600">₹ {product.price.toFixed(2)}</p>
+
+        {/* ✅ Quantity Selector */}
+        <div className="flex items-center mt-4 ">
+          <Button className='cursor-pointer' onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity === 1}>-</Button>
+          <span className="mx-4 text-lg cursor-default">{quantity}</span>
+          <Button className='cursor-pointer' onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))} disabled={quantity === maxQuantity} >+</Button>
         </div>
-        <Button className="mt-4 w-full bg-blue-600 text-white">Add to Cart</Button>
+
+        {/* ✅ Add to Cart Button */}
+        <Button className="mt-4 w-full bg-teal-800 hover:bg-teal-900 text-white cursor-pointer">Add to Cart</Button>
       </div>
+    </div>
     </div>
   );
 }
