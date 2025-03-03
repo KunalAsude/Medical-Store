@@ -4,7 +4,7 @@ import React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink } from "lucide-react"
+import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink, Shield } from "lucide-react"
 import Image from "next/image"
 
 import {
@@ -115,10 +115,10 @@ export default function Navbar() {
 
             <NavigationMenuItem >
               <div className="mt-4 border-0 cursor-pointer">
-              <NavigationMenuTrigger >
-                <Package className="h-4 w-4 mr-2 text-white" />
-                <p className="text-white">Categories</p>
-              </NavigationMenuTrigger>
+                <NavigationMenuTrigger >
+                  <Package className="h-4 w-4 mr-2 text-white" />
+                  <p className="text-white">Categories</p>
+                </NavigationMenuTrigger>
               </div>
               <NavigationMenuContent className="border-0 border-gray-900 bg-teal-900 rounded-lg shadow-lg">
                 <ul className="grid w-[400px] gap-3 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] border-0 bg-teal-900 rounded-xl shadow-lg">
@@ -212,11 +212,19 @@ export default function Navbar() {
           </Link>
 
           <Link href="/account">
-            <Button variant="ghost" size="icon" className="hover:bg-teal-700 lg:mr-5">
-              <User className="h-10 w-10  text-white font-bold" />
+            <Button variant="ghost" size="icon" className="hover:bg-teal-700">
+              <User className="h-10 w-10 text-white font-bold" />
               <span className="sr-only">Account</span>
             </Button>
           </Link>
+
+          <Link href="/admin">
+            <Button variant="ghost" size="icon" className="hover:bg-teal-700 lg:mr-5">
+              <Shield className="h-10 w-10 text-white font-bold" />
+              <span className="sr-only">Admin Panel</span>
+            </Button>
+          </Link>
+
 
           {/* Mobile Menu */}
           <Sheet>
