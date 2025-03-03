@@ -116,8 +116,8 @@ export default function Navbar() {
             <NavigationMenuItem >
               <div className="mt-4 border-0 cursor-pointer">
               <NavigationMenuTrigger >
-                <Package className="h-4 w-4 mr-2 " />
-                <p className="">Categories</p>
+                <Package className="h-4 w-4 mr-2 text-white" />
+                <p className="text-white">Categories</p>
               </NavigationMenuTrigger>
               </div>
               <NavigationMenuContent className="border-0 border-gray-900 bg-teal-900 rounded-lg shadow-lg">
@@ -213,7 +213,7 @@ export default function Navbar() {
 
           <Link href="/account">
             <Button variant="ghost" size="icon" className="hover:bg-teal-700 lg:mr-5">
-              <User className="h-10 w-10  text-white" />
+              <User className="h-10 w-10  text-white font-bold" />
               <span className="sr-only">Account</span>
             </Button>
           </Link>
@@ -222,7 +222,7 @@ export default function Navbar() {
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="hover:bg-teal-700">
-                <Menu className="h-5 w-5 text-white" />
+                <Menu className="h-5 w-5 text-white font-bold" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
