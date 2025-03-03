@@ -56,7 +56,7 @@ export default function Home() {
             <Link href="/products" className="inline-block bg-teal-800 text-white font-medium px-6 py-3 rounded-md hover:bg-teal-900 transition-colors">
               Shop Now
             </Link>
-            <Link href="https://medi-nexus.vercel.app/" className="inline-block bg-white text-teal-800 font-medium px-6 py-3 rounded-md hover:bg-gray-100 transition-colors">
+            <Link href="" className="inline-block bg-white text-teal-800 font-medium px-6 py-3 rounded-md hover:bg-gray-100 transition-colors">
               Consult a Pharmacist
             </Link>
           </div>
@@ -331,7 +331,7 @@ export default function Home() {
             <h3 className="font-bold text-white">Our Community Standards</h3>
           </div>
           <div className="space-y-4 text-gray-300">
-            <p>At medistore, we're committed to creating a safe and supportive environment for all our customers. Our community is built on respect, trust, and a shared commitment to health and wellbeing.</p>
+            <p>At MediPharm, we're committed to creating a safe and supportive environment for all our customers. Our community is built on respect, trust, and a shared commitment to health and wellbeing.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-white mb-2">For Customers</h4>
@@ -361,7 +361,7 @@ export default function Home() {
       <footer className="bg-teal-950 rounded-lg p-8 text-gray-300">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="font-bold text-white text-lg mb-4">medistore</h3>
+            <h3 className="font-bold text-white text-lg mb-4">MediPharm</h3>
             <p className="mb-4">Your trusted partner for all healthcare needs. We provide quality medicines and healthcare products with expert guidance.</p>
             <div className="flex space-x-4">
               <a href="#" className="text-white hover:text-teal-400">
@@ -421,14 +421,14 @@ export default function Home() {
                 <svg className="h-6 w-6 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <span>support@medistore.com</span>
+                <span>support@medipharm.com</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-700 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; 2025 medistore. All rights reserved.</p>
+            <p>&copy; 2025 MediPharm. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/terms" className="hover:text-teal-400">Terms of Service</Link>
               <Link href="/privacy" className="hover:text-teal-400">Privacy Policy</Link>
