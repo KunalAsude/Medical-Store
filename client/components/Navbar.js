@@ -2,19 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import {
-  ShoppingCart,
-  User,
-  Menu,
-  ChevronDown,
-  ChevronRight,
-  Home,
-  Package,
-  Phone,
-  ExternalLink,
-  Shield,
-  Stethoscope,
-} from "lucide-react"
+import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink, Shield, Stethoscope } from 'lucide-react'
 import Image from "next/image"
 import {
   NavigationMenu,
@@ -31,6 +19,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { getAllCategories } from "@/lib/actions/categoryActions"
+
+// Import the HoverCard components
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
+
 
 // Data transformation function
 const transformCategories = (categories) => {
@@ -62,6 +59,14 @@ const transformCategories = (categories) => {
 export default function Navbar() {
   const [openCategory, setOpenCategory] = useState(null)
   const [categories, setCategories] = useState([])
+
+  // Add a state for user authentication status
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    avatar: "https://github.com/shadcn.png"
+  })
 
   useEffect(() => {
     const get = async () => {
@@ -111,23 +116,23 @@ export default function Navbar() {
                 <Stethoscope className="h-4 w-4 mr-2" />
                 Categories
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-teal-900 rounded-lg shadow-lg  border-0 w-full">
-                <div className="grid w-[600px] grid-cols-2 p-4 gap-2">
+              <NavigationMenuContent className="bg-teal-900 rounded-lg shadow-lg border-0 w-full">
+                <div className="grid w-[600px] grid-cols-2 p-4 gap-4">
                   {categories.map((category) => (
-                    <div key={category._id} className="group/item">
+                    <div key={category._id} className="group relative">
                       <Link
                         href={`/category/${category._id}`}
-                        className="block p-3 rounded-md hover:bg-teal-800 transition-colors text-white font-medium"
+                        className="block p-3 rounded-md hover:bg-teal-800 transition-colors text-white font-medium group-hover:bg-teal-800"
                       >
                         {category.name}
                       </Link>
                       {category.subcategories.length > 0 && (
-                        <div className="pl-4 hidden group-hover/item:block">
+                        <div className="pl-4 mt-1 space-y-1  group-hover:opacity-100 transition-opacity">
                           {category.subcategories.map((subcategory) => (
                             <Link
                               key={subcategory._id}
                               href={`/category/${subcategory._id}`}
-                              className="block py-2 px-3 text-sm text-gray-300 hover:text-white hover:bg-teal-800 rounded-md transition-colors"
+                              className="block py-1.5 px-3 text-sm text-gray-300 hover:text-white hover:bg-teal-800 rounded-md transition-colors"
                             >
                               {subcategory.name}
                             </Link>
@@ -171,12 +176,80 @@ export default function Navbar() {
             </Button>
           </Link>
 
-          <Link href="/account">
-            <Button variant="ghost" size="icon" className="hover:bg-teal-700">
-              <User className="h-10 w-10 text-white font-bold" />
-              <span className="sr-only">Account</span>
-            </Button>
-          </Link>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Button variant="ghost" size="icon" className="hover:bg-teal-700">
+                <User className="h-10 w-10 text-white font-bold" />
+                <span className="sr-only">Account</span>
+              </Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80 bg-teal-900 border-teal-800 text-white mr-5">
+              {isAuthenticated ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar>
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback className="bg-teal-700">{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{user.name}</span>
+                      <span className="text-sm text-gray-300">{user.email}</span>
+                    </div>
+                  </div>
+                  <Separator className="bg-teal-800" />
+                  <div className="grid gap-2">
+                    <Link href="/account">
+                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
+                        Account Settings
+                      </Button>
+                    </Link>
+                    <Link href="/orders">
+                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
+                        My Orders
+                      </Button>
+                    </Link>
+                    <Link href="/wishlist">
+                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
+                        Wishlist
+                      </Button>
+                    </Link>
+                    <Separator className="bg-teal-800" />
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      onClick={() => setIsAuthenticated(false)}
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar>
+                      <AvatarFallback className="bg-teal-700">
+                        <User className="h-5 w-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-medium">Welcome</span>
+                      <span className="text-sm text-gray-300">Sign in to your account</span>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Link href="/auth/login">
+                      <Button className="w-full">Sign In</Button>
+                    </Link>
+                    <Link href="/auth/login/register">
+                      <Button variant="outline" className="w-full border-teal-700 text-white hover:bg-teal-800 hover:text-white">
+                        Create Account
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </HoverCardContent>
+          </HoverCard>
 
           <Link href="/admin">
             <Button variant="ghost" size="icon" className="hover:bg-teal-700 lg:mr-5">
@@ -296,4 +369,3 @@ export default function Navbar() {
     </header>
   )
 }
-
