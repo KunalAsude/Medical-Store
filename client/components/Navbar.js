@@ -13,6 +13,7 @@ import {
   Phone,
   ExternalLink,
   Shield,
+  Stethoscope,
 } from "lucide-react"
 import Image from "next/image"
 import {
@@ -105,43 +106,37 @@ export default function Navbar() {
               </Link>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
-              <div className="mt-4 border-0 cursor-pointer">
-                <NavigationMenuTrigger>
-                  <Package className="h-4 w-4 mr-2 text-white" />
-                  <p className="text-white">Categories</p>
-                </NavigationMenuTrigger>
-              </div>
-              <NavigationMenuContent className="border-0 border-gray-900 bg-teal-900 rounded-lg shadow-lg">
-                <ul className="grid w-[400px] gap-3 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] border-0 bg-teal-900 rounded-xl shadow-lg">
+            <NavigationMenuItem className="mt-3.5">
+              <NavigationMenuTrigger className="bg-transparent hover:bg-teal-800 text-white data-[state=open]:bg-teal-800">
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Categories
+              </NavigationMenuTrigger>
+              <NavigationMenuContent className="bg-teal-900 rounded-lg shadow-lg  border-0 w-full">
+                <div className="grid w-[600px] grid-cols-2 p-4 gap-2">
                   {categories.map((category) => (
-                    <li key={category._id} className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          href={`/category/${category._id}`}
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md p-5 no-underline outline-none focus:shadow-md hover:shadow-md transition-all duration-200 hover:bg-teal-800"
-                        >
-                          <div className="mb-2 mt-2 text-lg font-medium text-black">{category.name}</div>
-                          <div className="text-sm leading-tight text-white">
-                            <ul className="space-y-1.5">
-                              {category.subcategories.map((subcategory) => (
-                                <li key={subcategory._id}>
-                                  <Link
-                                    href={`/category/${subcategory._id}`}
-                                    className="text-sm hover:underline flex items-center"
-                                  >
-                                    <ChevronRight className="h-3 w-3 mr-1 text-black" />
-                                    {subcategory.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
+                    <div key={category._id} className="group/item">
+                      <Link
+                        href={`/category/${category._id}`}
+                        className="block p-3 rounded-md hover:bg-teal-800 transition-colors text-white font-medium"
+                      >
+                        {category.name}
+                      </Link>
+                      {category.subcategories.length > 0 && (
+                        <div className="pl-4 hidden group-hover/item:block">
+                          {category.subcategories.map((subcategory) => (
+                            <Link
+                              key={subcategory._id}
+                              href={`/category/${subcategory._id}`}
+                              className="block py-2 px-3 text-sm text-gray-300 hover:text-white hover:bg-teal-800 rounded-md transition-colors"
+                            >
+                              {subcategory.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
 
