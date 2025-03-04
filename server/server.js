@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
+import uploadRoutes from "./src/routes/uploadRoutes.js";
 
 
 dotenv.config();
@@ -20,6 +21,7 @@ mongoose
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/upload", uploadRoutes);
 
 
 const PORT = process.env.PORT || 5000;

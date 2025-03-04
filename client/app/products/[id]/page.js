@@ -38,8 +38,8 @@ export default function ProductPage() {
     <div className="container mx-auto p-6">
     <div className="overflow-hidden mx-auto p-6 grid md:grid-cols-2 gap-8">
       {/* ✅ Product Image */}
-      <div className="relative w-full h-150 bg-teal-900 overflow-hidden">
-        <Image src={product.images?.[0] || '/fallback.jpg'} alt={product.name} layout="fill" objectFit="cover" className="rounded-lg" />
+      <div className="relative  w-full h-150  overflow-hidden rounded-xl  shadow-md hover:shadow-lg bg-gray-400">
+        <Image src={product.images?.[0]?.url || '/fallback.jpg'} alt={product.name} layout="fill" objectFit="cover" className="rounded-2xl p-2 h-16" />
       </div>
 
       {/* ✅ Product Details */}

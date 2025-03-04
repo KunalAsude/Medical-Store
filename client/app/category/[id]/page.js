@@ -209,7 +209,7 @@ export default function CategoryPage({ params }) {
                 id={product._id}
                 name={product.name}
                 price={product.price}
-                image={product.image}
+                image={product?.images[0]?.url}
                 category={product.categoryName}
               />
             ))}

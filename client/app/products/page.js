@@ -197,8 +197,8 @@ export default function ProductsPage() {
                 id={product._id}
                 name={product.name}
                 price={product.price}
-                image={product.image}
-                category={product.categoryName}
+                image={product?.images[0]?.url}
+                category={product?.brand}
               />
             ))}
           </div>

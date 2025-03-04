@@ -124,7 +124,7 @@ export default function Home() {
       name: "Antiseptic Liquid",
       price: 120.0,
       image:
-        "https://images.unsplash.com/photo-1584308666989-a68c6d494eca?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        "https://res.cloudinary.com/dwfsnk8fm/image/upload/v1741102798/images_kosnx5.jpg",
       category: "First Aid",
       rating: 4.8,
       reviews: 87,
@@ -354,7 +354,7 @@ export default function Home() {
                 <div className="bg-teal-950 rounded-lg shadow-md overflow-hidden">
                   <div className="relative h-40 md:h-48 lg:h-56">
                     <Image
-                      src={"/placeholder.svg"}
+                      src={category?.image||"/placeholder.svg"}
                       alt={category?.name}
                       fill
                       className="rounded-t-lg object-cover p-2"
@@ -389,7 +389,7 @@ export default function Home() {
                 <Link href={`/products/${product?._id}`}>
                   <div className="relative h-48 lg:h-56">
                     <Image
-                      src={product?.images[0] || "/placeholder.svg"}
+                      src={product?.images[0]?.url || "/placeholder.svg"}
                       alt={product.name}
                       fill
                       className="object-cover p-2 "
