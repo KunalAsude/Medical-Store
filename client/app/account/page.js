@@ -1,30 +1,63 @@
 "use client"
 
-import { useState } from "react"
+import React from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Mail, User, MapPin, Phone, Save, LogOut, CreditCard, Package, Heart, Home } from "lucide-react"
+import {
+  Mail,
+  User,
+  MapPin,
+  Phone,
+  Save,
+  LogOut,
+  CreditCard,
+  Package,
+  Heart,
+  Home,
+  Settings,
+  Bell,
+  Shield,
+  HelpCircle,
+  Menu,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-
 import { toast } from "sonner"
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export default function AccountPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isMobile, setIsMobile] = useState(false)
+
   const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Medical Avenue, Health City, HC 12345",
-    avatar: "https://github.com/shadcn.png",
+    name: "Abc Xyz",
+    email: "abcxyz@example.com",
+    phone: "8888899999",
+    address: "123 Medical City, Banglore, 12345",
+    avatar: "",
   })
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    checkIfMobile()
+    window.addEventListener("resize", checkIfMobile)
+
+    return () => {
+      window.removeEventListener("resize", checkIfMobile)
+    }
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -38,270 +71,307 @@ export default function AccountPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate saving profile
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
       toast.success("Profile updated successfully")
-    }, 1500)
+    } catch (error) {
+      toast.error("Failed to update profile")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleLogout = () => {
-    // Simulate logout
     router.push("/login")
   }
 
-  return (
-    <div className="container max-w-7xl mx-auto py-12">
-      <div className="flex flex-col gap-8">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">Account Settings</h1>
-            <p className="text-muted-foreground mt-1">Manage your personal information and preferences</p>
+  const renderSidebar = () => (
+    <div className="flex flex-col h-full">
+      <div className="p-6 border-b border-gray-900 bg-teal-950">
+        <div className="flex flex-col items-center gap-4">
+          <Avatar className="h-16 w-16 lg:h-20 lg:w-20 bg-teal-700">
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="text-center">
+            <h2 className="text-lg font-semibold">{user.name}</h2>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="gap-2 border-teal-800 text-white hover:bg-teal-800">
-            <LogOut className="h-4 w-4" />
-            Sign Out
+          <Button variant="outline" size="sm" className="w-full bg-teal-800 hover:bg-teal-900 border-0">
+            Edit Profile
           </Button>
-        </header>
-
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-          {/* Profile sidebar */}
-          <aside>
-            <Card className="border-teal-800 bg-teal-950/50 sticky top-8">
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center gap-4 mb-6">
-                  <Avatar className="h-24 w-24 border-2 border-teal-700">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-teal-700 text-xl font-semibold">{user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="text-center">
-                    <h2 className="text-xl font-semibold text-white">{user.name}</h2>
-                    <p className="text-sm text-gray-300">{user.email}</p>
-                  </div>
-                  <Button variant="outline" size="sm" className="w-full border-teal-800 text-white hover:bg-teal-800">
-                    Change Avatar
-                  </Button>
-                </div>
-
-                <Separator className="my-6 bg-teal-800/70" />
-
-                <nav className="space-y-1.5">
-                  <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-800 text-white">
-                    <User className="h-4 w-4" />
-                    Account Settings
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-800 text-white">
-                    <Package className="h-4 w-4" />
-                    My Orders
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-800 text-white">
-                    <Heart className="h-4 w-4" />
-                    Wishlist
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-800 text-white">
-                    <Home className="h-4 w-4" />
-                    Saved Addresses
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-800 text-white">
-                    <CreditCard className="h-4 w-4" />
-                    Payment Methods
-                  </Button>
-                </nav>
-              </CardContent>
-            </Card>
-          </aside>
-
-          {/* Main content */}
-          <main>
-            <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="bg-teal-900/80 text-white mb-6 w-full justify-start">
-                <TabsTrigger value="profile" className="data-[state=active]:bg-teal-800">
-                  Profile
-                </TabsTrigger>
-                <TabsTrigger value="orders" className="data-[state=active]:bg-teal-800">
-                  Orders
-                </TabsTrigger>
-                <TabsTrigger value="addresses" className="data-[state=active]:bg-teal-800">
-                  Addresses
-                </TabsTrigger>
-                <TabsTrigger value="payment" className="data-[state=active]:bg-teal-800">
-                  Payment Methods
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="profile">
-                <Card className="border-teal-800 bg-teal-950/50">
-                  <CardHeader>
-                    <CardTitle className="text-white text-xl">Personal Information</CardTitle>
-                    <CardDescription className="text-gray-300">
-                      Update your profile details and contact information
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="name" className="text-white">
-                            Full Name
-                          </Label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                              id="name"
-                              name="name"
-                              type="text"
-                              value={user.name}
-                              onChange={handleChange}
-                              className="pl-10 bg-teal-900/50 border-teal-800 text-white"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email" className="text-white">
-                            Email Address
-                          </Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                              id="email"
-                              name="email"
-                              type="email"
-                              value={user.email}
-                              onChange={handleChange}
-                              className="pl-10 bg-teal-900/50 border-teal-800 text-white"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-white">
-                            Phone Number
-                          </Label>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                              id="phone"
-                              name="phone"
-                              type="tel"
-                              value={user.phone}
-                              onChange={handleChange}
-                              className="pl-10 bg-teal-900/50 border-teal-800 text-white"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="address" className="text-white">
-                          Primary Address
-                        </Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <Textarea
-                            id="address"
-                            name="address"
-                            value={user.address}
-                            onChange={handleChange}
-                            className="pl-10 bg-teal-900/50 border-teal-800 text-white min-h-[100px] resize-none"
-                          />
-                        </div>
-                      </div>
-                    </form>
-                  </CardContent>
-                  <CardFooter className="border-t border-teal-800/50 px-6 py-4">
-                    <Button 
-                      type="submit" 
-                      onClick={handleSubmit}
-                      className="gap-2 bg-teal-700 hover:bg-teal-600" 
-                      disabled={isLoading}
-                    >
-                      <Save className="h-4 w-4" />
-                      {isLoading ? "Saving Changes..." : "Save Changes"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="orders">
-                <Card className="border-teal-800 bg-teal-950/50">
-                  <CardHeader>
-                    <CardTitle className="text-white text-xl">Order History</CardTitle>
-                    <CardDescription className="text-gray-300">
-                      View and track your recent orders and purchase history
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Package className="h-12 w-12 text-teal-700 mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">No orders yet</h3>
-                      <p className="text-gray-400 max-w-md mb-6">
-                        You haven't placed any orders yet. Start shopping to see your order history here.
-                      </p>
-                      <Button className="bg-teal-700 hover:bg-teal-600">
-                        Browse Products
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="addresses">
-                <Card className="border-teal-800 bg-teal-950/50">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-white text-xl">Saved Addresses</CardTitle>
-                        <CardDescription className="text-gray-300">
-                          Manage your delivery and billing addresses
-                        </CardDescription>
-                      </div>
-                      <Button size="sm" className="bg-teal-700 hover:bg-teal-600">
-                        Add New Address
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Home className="h-12 w-12 text-teal-700 mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">No saved addresses</h3>
-                      <p className="text-gray-400 max-w-md">
-                        Add a new address to make checkout faster and easier.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="payment">
-                <Card className="border-teal-800 bg-teal-950/50">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-white text-xl">Payment Methods</CardTitle>
-                        <CardDescription className="text-gray-300">
-                          Manage your payment options and preferences
-                        </CardDescription>
-                      </div>
-                      <Button size="sm" className="bg-teal-700 hover:bg-teal-600">
-                        Add Payment Method
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <CreditCard className="h-12 w-12 text-teal-700 mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">No payment methods</h3>
-                      <p className="text-gray-400 max-w-md">
-                        Add a payment method to make checkout faster and more secure.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </main>
         </div>
       </div>
+
+      <ScrollArea className="flex-1 bg-teal-950">
+        <div className="py-4">
+          <div className="px-4 mb-2">
+            <h3 className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">Account</h3>
+          </div>
+          <nav className="space-y-1 px-2">
+            {[
+              { id: "profile", icon: User, label: "Profile" },
+              { id: "orders", icon: Package, label: "Orders" },
+              { id: "addresses", icon: Home, label: "Addresses" },
+              { id: "payment", icon: CreditCard, label: "Payment Methods" },
+              { id: "wishlist", icon: Heart, label: "Wishlist" },
+            ].map((item) => (
+              <Button
+                key={item.id}
+                variant={activeTab === item.id ? "secondary" : "ghost"}
+                className={`w-full justify-start gap-3 border-0 ${
+                  activeTab === item.id ? "bg-teal-800 hover:bg-teal-900" : "hover:bg-teal-900"
+                }`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Button>
+            ))}
+          </nav>
+
+          <Separator className="my-4 mx-2" />
+
+          <div className="px-4 mb-2">
+            <h3 className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">Settings</h3>
+          </div>
+          <nav className="space-y-1 px-2">
+            {[
+              { icon: Settings, label: "Preferences" },
+              { icon: Bell, label: "Notifications" },
+              { icon: Shield, label: "Security" },
+            ].map((item, index) => (
+              <Button 
+                key={index} 
+                variant="ghost" 
+                className="w-full justify-start gap-3 hover:bg-teal-900 border-0"
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Button>
+            ))}
+          </nav>
+        </div>
+      </ScrollArea>
+
+      <div className="p-4 border-t border-gray-900 bg-teal-950">
+        <div className="space-y-2">
+          <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-teal-900 border-0">
+            <HelpCircle className="h-4 w-4" />
+            <span>Help & Support</span>
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleLogout} 
+            className="w-full justify-start gap-3 bg-teal-800 hover:bg-teal-900 border-0"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="flex flex-col lg:flex-row min-h-screen bg-background">
+      <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-900">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="border-0">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[300px] p-0 border-gray-900 bg-teal-700">
+            {renderSidebar()}
+          </SheetContent>
+        </Sheet>
+        
+        <h1 className="text-xl font-bold">Account</h1>
+        <Avatar className="h-8 w-8 bg-teal-700">
+          <AvatarImage src={user.avatar} alt={user.name} />
+          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+      </div>
+
+      <aside className="hidden lg:block w-[280px] border-r border-gray-900">
+        {renderSidebar()}
+      </aside>
+
+      <main className="flex-1">
+        <div className="h-full p-4 md:p-8">
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
+            <p className="text-muted-foreground mt-1">Manage your personal information and preferences</p>
+          </header>
+
+          {activeTab === "profile" && (
+            <Card className="border border-gray-900 bg-teal-950">
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your profile details and contact information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          name="name"
+                          value={user.name}
+                          onChange={handleChange}
+                          className="pl-10 border-gray-900"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={user.email}
+                          onChange={handleChange}
+                          className="pl-10 border-gray-900"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          value={user.phone}
+                          onChange={handleChange}
+                          className="pl-10 border-gray-900"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Primary Address</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Textarea
+                        id="address"
+                        name="address"
+                        value={user.address}
+                        onChange={handleChange}
+                        className="pl-10 min-h-[100px] resize-none border-gray-900"
+                      />
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter className="border-t border-gray-900">
+                <Button 
+                  type="submit" 
+                  onClick={handleSubmit} 
+                  disabled={isLoading}
+                  className="gap-2 bg-teal-800 hover:bg-teal-900 border-0 mt-5"
+                >
+                  <Save className="h-4 w-4" />
+                  {isLoading ? "Saving Changes..." : "Save Changes"}
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+
+          {activeTab === "orders" && (
+            <Card className="border border-gray-900 bg-teal-950">
+              <CardHeader>
+                <CardTitle>Order History</CardTitle>
+                <CardDescription>View and track your recent orders</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No orders yet</h3>
+                  <p className="text-muted-foreground max-w-md mb-6">
+                    You haven't placed any orders yet. Start shopping to see your order history here.
+                  </p>
+                  <Button className="bg-teal-800 hover:bg-teal-900 border-0">Browse Products</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "addresses" && (
+            <Card className="border border-gray-900 bg-teal-950">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Saved Addresses</CardTitle>
+                    <CardDescription>Manage your delivery addresses</CardDescription>
+                  </div>
+                  <Button size="sm" className="bg-teal-800 hover:bg-teal-900 border-0">Add New Address</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Home className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No saved addresses</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Add a new address to make checkout faster and easier.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "payment" && (
+            <Card className="border border-gray-900 bg-teal-950">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Payment Methods</CardTitle>
+                    <CardDescription>Manage your payment options</CardDescription>
+                  </div>
+                  <Button size="sm" className="bg-teal-800 hover:bg-teal-900 border-0">Add Payment Method</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No payment methods</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Add a payment method to make checkout faster and more secure.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "wishlist" && (
+            <Card className="border border-gray-900 bg-teal-950">
+              <CardHeader>
+                <CardTitle>Wishlist</CardTitle>
+                <CardDescription>Items you've saved for later</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Your wishlist is empty</h3>
+                  <p className="text-muted-foreground max-w-md mb-6">
+                    Save items you're interested in for later.
+                  </p>
+                  <Button className="bg-teal-800 hover:bg-teal-900 border-0">Explore Products</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </main>
     </div>
   )
 }
