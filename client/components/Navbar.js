@@ -27,6 +27,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
+import { useCart } from "@/context/CartContext"
 
 
 // Data transformation function
@@ -59,6 +60,8 @@ const transformCategories = (categories) => {
 export default function Navbar() {
   const [openCategory, setOpenCategory] = useState(null)
   const [categories, setCategories] = useState([])
+  const { getCartItemCount } = useCart();
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   // Add a state for user authentication status
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -76,6 +79,10 @@ export default function Navbar() {
     }
     get()
   }, [])
+
+  useEffect(() => {
+    setCartItemCount(getCartItemCount());
+  }, [getCartItemCount]);
 
   const toggleCategory = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName)
@@ -170,7 +177,7 @@ export default function Navbar() {
             <Button variant="ghost" size="icon" className="relative hover:bg-teal-700">
               <ShoppingCart className="h-10 w-10 text-white" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-rose-500 hover:bg-rose-600">
-                0
+              {cartItemCount}
               </Badge>
               <span className="sr-only">Shopping cart</span>
             </Button>

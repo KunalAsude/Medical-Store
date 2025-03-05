@@ -21,6 +21,7 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { getAllCategories } from "@/lib/actions/categoryActions"
 import { getAllProducts } from "@/lib/actions/productActions"
+import ProductCard from "@/components/ProductCard"
 
 export default function Home() {
   // State for dynamic elements
@@ -29,108 +30,8 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false)
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
+  const [bestSellers, setBestSellers] = useState([])
 
-  // Featured categories
-
-
-  // Featured products
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Advanced Pain Relief Tablets",
-      price: 190.0,
-      image:
-        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Pain Relief",
-      rating: 4.8,
-      reviews: 124,
-      isNew: true,
-      discount: 10,
-    },
-    {
-      id: 2,
-      name: "Digital Blood Pressure Monitor",
-      price: 2000.0,
-      image:
-        "https://images.unsplash.com/photo-1631815588090-d1bcbe9a8545?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Devices",
-      rating: 4.7,
-      reviews: 89,
-      isNew: false,
-      discount: 0,
-    },
-    {
-      id: 3,
-      name: "Cold & Flu Relief Syrup",
-      price: 120.0,
-      image:
-        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Cold & Flu",
-      rating: 4.5,
-      reviews: 76,
-      isNew: false,
-      discount: 5,
-    },
-    {
-      id: 4,
-      name: "Daily Multivitamin Tablets",
-      price: 300.0,
-      image:
-        "https://images.unsplash.com/photo-1577174881658-0f30ed549adc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Vitamins",
-      rating: 4.9,
-      reviews: 152,
-      isNew: true,
-      discount: 0,
-    },
-  ]
-
-  // Best selling products
-  const bestSellers = [
-    {
-      id: 5,
-      name: "Immunity Booster Capsules",
-      price: 450.0,
-      image:
-        "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Immunity",
-      rating: 4.9,
-      reviews: 203,
-      stock: "In Stock",
-    },
-    {
-      id: 6,
-      name: "Digital Thermometer",
-      price: 350.0,
-      image:
-        "https://images.unsplash.com/photo-1584982751601-97dcc096659c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Devices",
-      rating: 4.6,
-      reviews: 118,
-      stock: "Low Stock",
-    },
-    {
-      id: 7,
-      name: "Herbal Digestive Tablets",
-      price: 180.0,
-      image: "https://images.unsplash.com/photo-1550572017-edd951b55104?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      category: "Digestive Health",
-      rating: 4.7,
-      reviews: 95,
-      stock: "In Stock",
-    },
-    {
-      id: 8,
-      name: "Antiseptic Liquid",
-      price: 120.0,
-      image:
-        "https://res.cloudinary.com/dwfsnk8fm/image/upload/v1741102798/images_kosnx5.jpg",
-      category: "First Aid",
-      rating: 4.8,
-      reviews: 87,
-      stock: "In Stock",
-    },
-  ]
 
   // Health tips
   const healthTips = [
@@ -243,9 +144,17 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getAllCategories().then((data) => setCategories(data))
-    getAllProducts().then((data) => setProducts(data))
-  }, [])
+    Promise.all([
+      getAllCategories().then((data) => setCategories(data)),
+      getAllProducts().then((data) => {
+        // Set all products
+        setProducts(data);
+
+        const filteredBestSellers = data.filter(product => product.isBestSeller);
+        setBestSellers(filteredBestSellers);
+      })
+    ]);
+  }, []);
 
 
   return (
@@ -354,7 +263,7 @@ export default function Home() {
                 <div className="bg-teal-950 rounded-lg shadow-md overflow-hidden">
                   <div className="relative h-40 md:h-48 lg:h-56">
                     <Image
-                      src={category?.image||"/placeholder.svg"}
+                      src={category?.image || "/placeholder.svg"}
                       alt={category?.name}
                       fill
                       className="rounded-t-lg object-cover p-2"
@@ -381,67 +290,30 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.slice(0,4).map((product) => (
-              <div
-                key={product.id}
-                className="bg-teal-950 rounded-lg shadow-md overflow-hidden  hover:shadow-xl group"
-              >
-                <Link href={`/products/${product?._id}`}>
-                  <div className="relative h-48 lg:h-56">
-                    <Image
-                      src={product?.images[0]?.url || "/placeholder.svg"}
-                      alt={product.name}
-                      fill
-                      className="object-cover p-2 "
-                    />
-                    <div className="absolute top-2 right-2 bg-teal-800 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                      <Star className="h-3 w-3 mr-1 text-yellow-400 fill-yellow-400" />
-                      {/* <span>{product.rating}</span> */}
-                      <span className="ml-1 text-gray-300">({product?.averageRating})</span>
-                    </div>
-                    {/* {product.isNew && (
-                      <div className="absolute top-2 left-2 bg-amber-400 text-teal-950 text-xs font-bold px-2 py-1 rounded-full">
-                        NEW
-                      </div>
-                    )} */}
-                    
-                      {/* <div className="absolute bottom-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        {product?.brand}
-                      </div> */}
-                 
+            {products.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product._id}
+                id={product._id}
+                name={product.name}
+                price={product.price}
+                image={product?.images[0]?.url || "/placeholder.svg"}
+                category={product?.brand}
+                onAddToCart={(e) => handleAddToCart(e, product._id)}
+                extraContent={
+                  <div className="absolute top-2 right-2 bg-teal-800 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                    <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                    <span className="ml-1 text-gray-300">({product?.averageRating})</span>
                   </div>
-                  <div className="p-4">
-                    <span className="text-xs text-gray-300 bg-teal-800/50 px-2 py-1 rounded-full">
-                      {product?.brand}
-                    </span>
-                    <h3 className="font-medium text-white text-lg mt-2 mb-2 group-hover:text-teal-300 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center">
-                      <p className="text-green-400 font-bold">₹ {product.price.toFixed(2)}</p>
-                      {product.discount > 0 && (
-                        <p className="text-gray-400 line-through ml-2 text-sm">
-                          ₹ {(product.price * (1 + product.discount / 100)).toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-                <div className="px-4 pb-4 flex gap-2">
-                  <Button
-                    className="flex-1 bg-teal-800 text-white py-2 rounded-md hover:bg-teal-700 transition-colors"
-                    onClick={(e) => handleAddToCart(e, product.id)}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                  </Button>
+                }
+                additionalActions={
                   <Button
                     variant="outline"
                     className="p-2 border-teal-700 text-teal-500 hover:bg-teal-900 hover:text-teal-300"
                   >
                     <Heart className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
+                }
+              />
             ))}
           </div>
         </section>
@@ -473,7 +345,7 @@ export default function Home() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Best Sellers</h2>
             <Link
-              href="/products/best-sellers"
+              href="/products"
               className="text-teal-600 hover:text-teal-800 flex items-center text-sm font-medium"
             >
               View All <ChevronRight className="ml-1 h-4 w-4" />
@@ -481,54 +353,29 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {bestSellers.map((product) => (
-              <div
-                key={product.id}
-                className="bg-teal-950 rounded-lg shadow-md overflow-hidden  hover:shadow-xl"
-              >
-                <Link href={`/products/${product._id}`}>
-                  <div className="relative h-48 lg:h-56">
-                    <Image
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      fill
-                      className="object-cover p-2 transition-transform duration-500 "
-                    />
-                    <div className="absolute top-2 right-2 bg-teal-800 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                      <Star className="h-3 w-3 mr-1 text-yellow-400 fill-yellow-400" />
-                      <span>{product.rating}</span>
-                      <span className="ml-1 text-gray-300">({product.reviews})</span>
-                    </div>
-                    <div
-                      className={`absolute bottom-2 left-2 text-xs font-bold px-2 py-1 rounded-full ${product.stock === "Low Stock" ? "bg-amber-400 text-teal-950" : "bg-green-500 text-white"}`}
-                    >
-                      {product.stock}
-                    </div>
+              <ProductCard
+                key={product._id}
+                id={product._id}
+                name={product.name}
+                price={product.price}
+                image={product?.images[0]?.url || "/placeholder.svg"}
+                category={product?.brand}
+                onAddToCart={(e) => handleAddToCart(e, product._id)}
+                extraContent={
+                  <div className="absolute top-2 right-2 bg-teal-800 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                    <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                    <span className="ml-1 text-gray-300">({product?.averageRating})</span>
                   </div>
-                  <div className="p-4">
-                    <span className="text-xs text-gray-300 bg-teal-800/50 px-2 py-1 rounded-full">
-                      {product.category}
-                    </span>
-                    <h3 className="font-medium text-white text-lg mt-2 mb-2 group-hover:text-teal-300 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-green-400 font-bold">₹ {product.price.toFixed(2)}</p>
-                  </div>
-                </Link>
-                <div className="px-4 pb-4 flex gap-2">
-                  <Button
-                    className="flex-1 bg-teal-800 text-white py-2 rounded-md hover:bg-teal-700 transition-colors"
-                    onClick={(e) => handleAddToCart(e, product.id)}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                  </Button>
+                }
+                additionalActions={
                   <Button
                     variant="outline"
                     className="p-2 border-teal-700 text-teal-500 hover:bg-teal-900 hover:text-teal-300"
                   >
                     <Heart className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
+                }
+              />
             ))}
           </div>
         </section>
@@ -674,7 +521,7 @@ export default function Home() {
             </div>
             <div className="space-y-4 text-gray-300">
               <p>
-                At MediPharm, we're committed to creating a safe and supportive environment for all our customers. Our
+                At MediStore, we're committed to creating a safe and supportive environment for all our customers. Our
                 community is built on respect, trust, and a shared commitment to health and wellbeing.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -714,7 +561,7 @@ export default function Home() {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-white text-lg mb-4">MediPharm</h3>
+              <h3 className="font-bold text-white text-lg mb-4">MediStore</h3>
               <p className="mb-4">
                 Your trusted partner for all healthcare needs. We provide quality medicines and healthcare products with
                 expert guidance.
@@ -845,14 +692,14 @@ export default function Home() {
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
-                  <span>support@medipharm.com</span>
+                  <span>support@MediStore.com</span>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-700 pt-6">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p>&copy; 2025 MediPharm. All rights reserved.</p>
+              <p>&copy; 2025 MediStore. All rights reserved.</p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 <Link href="/terms" className="hover:text-teal-400 transition-colors">
                   Terms of Service

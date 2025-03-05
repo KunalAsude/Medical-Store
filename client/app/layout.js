@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation"; // Use usePathname instead of use
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { CartProvider } from "@/context/CartContext";
 import Loader from "@/components/Loader";
+import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({ subsets: ["latin"] });
 export const dynamic = "force-dynamic";
