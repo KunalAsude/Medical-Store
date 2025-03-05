@@ -254,7 +254,7 @@ export default function Home() {
               href="/category"
               className="text-teal-600 hover:text-teal-800 flex items-center text-sm font-medium"
             >
-              View All Categories <ChevronRight className="ml-1 h-4 w-4" />
+              All Categories <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

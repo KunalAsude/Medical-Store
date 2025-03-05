@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink, Shield, Stethoscope } from 'lucide-react'
+import { ShoppingCart, User, Menu, ChevronDown, ChevronRight, Home, Package, Phone, ExternalLink, Shield, Stethoscope, CircleUserRound, Package2, Settings, Heart, LogOut } from 'lucide-react'
 import Image from "next/image"
 import {
   NavigationMenu,
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/hover-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { useCart } from "@/context/CartContext"
+import {  getCurrentUser, logoutUser } from "@/lib/actions/authActions"
 
 
 // Data transformation function
@@ -65,17 +66,22 @@ export default function Navbar() {
 
   // Add a state for user authentication status
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://github.com/shadcn.png"
-  })
+  const [user, setUser] = useState({})
 
   useEffect(() => {
     const get = async () => {
+      const userData = await getCurrentUser();
+      console.log("User Data", userData)
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+      }
+
       const data = await getAllCategories()
       const transformedCategories = transformCategories(data)
       setCategories(transformedCategories)
+
+     
     }
     get()
   }, [])
@@ -87,6 +93,18 @@ export default function Navbar() {
   const toggleCategory = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName)
   }
+
+  const handleLogout = () => {
+    const logout = async () => {
+      const success = await logoutUser()
+      if (success) {
+        setUser({})
+        setIsAuthenticated(false)
+      }
+    }
+    logout()
+  };
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-b-gray-900 bg-teal-950 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -177,7 +195,7 @@ export default function Navbar() {
             <Button variant="ghost" size="icon" className="relative hover:bg-teal-700">
               <ShoppingCart className="h-10 w-10 text-white" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-rose-500 hover:bg-rose-600">
-              {cartItemCount}
+                {cartItemCount}
               </Badge>
               <span className="sr-only">Shopping cart</span>
             </Button>
@@ -190,45 +208,70 @@ export default function Navbar() {
                 <span className="sr-only">Account</span>
               </Button>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-teal-900 border-teal-800 text-white mr-5">
+            <HoverCardContent className="w-80 bg-teal-950 border-teal-800 text-white mr-5">
               {isAuthenticated ? (
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-4">
-                    <Avatar>
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="bg-teal-700">{user.name.charAt(0)}</AvatarFallback>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-center">
+                    <Avatar className="h-16 w-16 border-[3px] rounded-full border-gray-900 bg-teal-700  bg-flex items-center justify-center">
+                      <AvatarFallback className="text-lg text-gray-800 font-bold flex items-center justify-center w-full h-full">
+                        {`${user.firstName[0]}${user.lastName[0]}`}
+                      </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{user.name}</span>
-                      <span className="text-sm text-gray-300">{user.email}</span>
-                    </div>
+
                   </div>
-                  <Separator className="bg-teal-800" />
+
+                  <div className="bg-gray-700/30 backdrop-blur-sm rounded-lg p-4 flex flex-col gap-1 items-center">
+                    <span className="font-semibold text-lg text-white">
+                      {`${user.firstName} ${user.lastName}`}
+                    </span>
+                    <span className="text-sm text-teal-500">{user.email}</span>
+                  </div>
+
+                  <Separator className="bg-gray-700/50" />
+
                   <div className="grid gap-2">
-                    <Link href="/account">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
-                        Account Settings
-                      </Button>
-                    </Link>
-                    <Link href="/orders">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
-                        My Orders
-                      </Button>
-                    </Link>
-                    <Link href="/wishlist">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-teal-800 text-white">
-                        Wishlist
-                      </Button>
-                    </Link>
-                    <Separator className="bg-teal-800" />
+                    <Link href={'/account'}>
                     <Button
-                      variant="destructive"
-                      className="w-full"
-                      onClick={() => setIsAuthenticated(false)}
+                      variant="ghost"
+                      className="w-full justify-start text-gray-300 hover:text-teal-200 hover:bg-gray-700/50 transition-colors"
                     >
-                      Logout
+                      <CircleUserRound className="mr-3 h-4 w-4" />
+                      Account Settings
+                    </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-300 hover:text-teal-200 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <Package2 className="mr-3 h-4 w-4" />
+                      My Orders
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-300 hover:text-teal-200 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <Heart className="mr-3 h-4 w-4" />
+                      Wishlist
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-300 hover:text-teal-200 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <Settings className="mr-3 h-4 w-4" />
+                      Preferences
                     </Button>
                   </div>
+
+                  <Separator className="bg-gray-700/50" />
+
+                  <Button
+                    variant="ghost"
+                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-3 h-4 w-4" />
+                    Logout
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">

@@ -1,4 +1,7 @@
-const mongoose = require('mongoose');
+
+import { Schema } from 'mongoose';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const UserSchema = new mongoose.Schema({
   firstName: {
@@ -21,6 +24,11 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email address']
   },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters long']
+  },
   phoneNumber: {
     type: String,
     trim: true,
@@ -31,46 +39,84 @@ const UserSchema = new mongoose.Schema({
       message: 'Please provide a valid phone number'
     }
   },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters long']
-  },
   address: {
     street: {
       type: String,
-      required: [true, 'Street address is required'],
       trim: true
     },
     city: {
       type: String,
-      required: [true, 'City is required'],
       trim: true
     },
     state: {
       type: String,
-      required: [true, 'State is required'],
       trim: true
     },
     postalCode: {
       type: String,
-      required: [true, 'Postal code is required'],
       trim: true
     },
     country: {
       type: String,
-      required: [true, 'Country is required'],
       trim: true
     }
   },
-  lastLogin: Date,
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'manager'],
+    default: 'user'
+  },
   accountStatus: {
     type: String,
     enum: ['Active', 'Suspended', 'Inactive'],
     default: 'Active'
-  }
-}, {
-  timestamps: true
+  },
+  lastLogin: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
+}, { 
+  timestamps: true 
 });
 
-module.exports = mongoose.model('User', UserSchema);
+// Password hashing middleware
+UserSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('password')) return next();
+
+  try {
+    // Generate a salt
+    const salt = await bcrypt.genSalt(10);
+    // Hash the password along with our new salt
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// Method to check password validity
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to check account status
+UserSchema.methods.isAccountActive = function() {
+  return this.accountStatus === 'Active';
+};
+
+// Method to generate public profile
+UserSchema.methods.toPublicProfile = function() {
+  return {
+    id: this._id,
+    firstName: this.firstName,
+    lastName: this.lastName,
+    email: this.email,
+    phoneNumber: this.phoneNumber,
+    address: this.address,
+    role: this.role,
+    lastLogin: this.lastLogin
+  };
+};
+
+const User = mongoose.model('User', UserSchema);
+export default User;

@@ -31,6 +31,7 @@ import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { getCurrentUser } from "@/lib/actions/authActions"
 
 export default function AccountPage() {
   const router = useRouter()
@@ -85,13 +86,27 @@ export default function AccountPage() {
     router.push("/login")
   }
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getCurrentUser()
+        setUser(res)
+        
+      } catch (error) {
+        console.error("Error fetching user data:", error)
+      }
+    }
+    fetchUser()
+  }, [])
+  
+
   const renderSidebar = () => (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-gray-900 bg-teal-950">
         <div className="flex flex-col items-center gap-4">
           <Avatar className="h-16 w-16 lg:h-20 lg:w-20 bg-teal-700">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{user.firstName?.charAt(0).toUpperCase()}{user.lastName?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="text-center">
             <h2 className="text-lg font-semibold">{user.name}</h2>
@@ -190,7 +205,7 @@ export default function AccountPage() {
         <h1 className="text-xl font-bold">Account</h1>
         <Avatar className="h-8 w-8 bg-teal-700">
           <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback>{user.firstName?.charAt(0).toUpperCase()}{user.lastName?.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
       </div>
 
@@ -217,11 +232,11 @@ export default function AccountPage() {
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <User className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="name"
                           name="name"
-                          value={user.name}
+                          value={user?.firstName + " " + user?.lastName}
                           onChange={handleChange}
                           className="pl-10 border-gray-900"
                         />
@@ -230,7 +245,7 @@ export default function AccountPage() {
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="email"
                           name="email"
@@ -246,12 +261,12 @@ export default function AccountPage() {
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Phone className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="phone"
                           name="phone"
                           type="tel"
-                          value={user.phone}
+                          value={user?.phoneNumber}
                           onChange={handleChange}
                           className="pl-10 border-gray-900"
                         />
@@ -261,11 +276,12 @@ export default function AccountPage() {
                   <div className="space-y-2">
                     <Label htmlFor="address">Primary Address</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <MapPin className="absolute left-3 top-2 h-4 w-4 text-muted-foreground" />
                       <Textarea
                         id="address"
                         name="address"
-                        value={user.address}
+                        disabled
+                        value={user.address?.street + ", " + user.address?.city + ", " + user.address?.state+ ", " + user.address?.country + ", " + user.address?.postalCode}
                         onChange={handleChange}
                         className="pl-10 min-h-[100px] resize-none border-gray-900"
                       />

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, MapPin, Phone, Building, Globe } from 'lucide-react';
+import { registerUser } from '@/lib/actions/authActions';
 
 // Validation function to replace Zod schema
 function validateForm(formData) {
@@ -101,24 +102,46 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form
-    const validationResult = validateForm(formData);
+    setIsLoading(true);
     
-    if (validationResult.isValid) {
-      setIsLoading(true);
+    try {
+      // Use the registerUser function
+      const result = await registerUser(formData);
+      console.log("result", result);
       
-      // Simulate registration
-      setTimeout(() => {
-        console.log('Form data submitted:', formData);
-        setIsLoading(false);
-        // Redirect to home page after successful registration
+      if (result && result.user) {
+        // Successful registration
+        console.log('Registration successful', result.user);
+        
+        // Store user info and tokens in localStorage for later use
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(result.user));
+          
+          // Store tokens if available
+          if (result.tokens) {
+            localStorage.setItem('accessToken', result.tokens.accessToken);
+            localStorage.setItem('refreshToken', result.tokens.refreshToken);
+          }
+        }
+        
+        // Redirect to home or dashboard
         router.push('/');
-      }, 1500);
-    } else {
-      setErrors(validationResult.errors);
+      } else {
+        // Handle registration failure
+        setErrors({
+          submit: result?.message || "Registration failed"
+        });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrors({
+        submit: "An unexpected error occurred"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

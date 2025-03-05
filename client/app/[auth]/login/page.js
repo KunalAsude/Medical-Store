@@ -4,6 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { loginUser } from "@/lib/actions/authActions"
+
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,6 +16,7 @@ export default function LoginPage() {
     password: "",
   })
   const [errors, setErrors] = useState({})
+  const [loginError, setLoginError] = useState(null)
 
   const validateForm = () => {
     const newErrors = {};
@@ -38,6 +41,14 @@ export default function LoginPage() {
       ...prev,
       [name]: value,
     }))
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
+    // Clear general login error
+    if (loginError) {
+      setLoginError(null);
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -47,13 +58,23 @@ export default function LoginPage() {
     
     if (Object.keys(validationErrors).length === 0) {
       setIsLoading(true)
+      setLoginError(null)
 
-      // Simulate login
-      setTimeout(() => {
+      try {
+        const result = await loginUser(formData);
+
+        if (result) {
+          // Successful login
+          router.push("/")
+        } else {
+          // Login failed
+          setLoginError("Invalid email or password. Please try again.")
+        }
+      } catch (error) {
+        setLoginError(error.message || "An unexpected error occurred")
+      } finally {
         setIsLoading(false)
-        // Redirect to home page after successful login
-        router.push("/")
-      }, 1500)
+      }
     } else {
       setErrors(validationErrors);
     }
@@ -67,6 +88,12 @@ export default function LoginPage() {
           <p className="text-gray-300 mb-6 border-b-gray-700 border-b pb-4">
             Sign in to access your Medi-Store account
           </p>
+
+          {loginError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{loginError}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -109,7 +136,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
@@ -118,7 +145,7 @@ export default function LoginPage() {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12 rounded-md"
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12 rounded-md disabled:opacity-50"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
