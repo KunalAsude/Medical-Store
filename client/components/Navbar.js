@@ -590,7 +590,7 @@ export default function Navbar() {
       {/* Chat Button */}
       <button
         onClick={toggleChat}
-        className={`absolute sm:top-160 top-200 right-5 p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-float
+        className={`fixed sm:top-160 top-160 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-float
                 ${isChatOpen ? "bg-red-500 hover:bg-red-600" : "bg-black hover:bg-gray-800"}`}
         aria-label={isChatOpen ? "Close chat" : "Open chat"}
       >
