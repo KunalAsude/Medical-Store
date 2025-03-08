@@ -599,37 +599,38 @@ export default function Navbar() {
 
       {/* Chat Window */}
       {isChatOpen && (
-        <div className="fixed sm:top-40 top-100 right-5 w-[70%] sm:w-[400px] bg-gradient-to-b from-teal-900 to-teal-950 rounded-lg shadow-xl z-50 flex flex-col overflow-hidden border border-teal-700/50 max-h-[85vh] sm:max-h-[600px] hide-scrollbar">
-          <div className="p-2 sm:p-4 bg-gradient-to-r from-teal-950 to-teal-950 text-white flex justify-between items-center border-b border-gray-900 hide-scrollbar">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="bg-teal-700 p-1 sm:p-1.5 rounded-full">
-                <Stethoscope size={14} className="text-white sm:size-4" />
+        <div className="fixed sm:top-40 top-60 right-5 w-[85%] sm:w-[400px] bg-gradient-to-b from-teal-900 to-teal-950 rounded-lg shadow-xl z-50 flex flex-col overflow-hidden border border-teal-700/50 max-h-[90vh] sm:max-h-[600px] hide-scrollbar">
+          <div className="p-3 sm:p-4 bg-gradient-to-r from-teal-950 to-teal-950 text-white flex justify-between items-center border-b border-gray-900 hide-scrollbar">
+            <div className="flex items-center space-x-3">
+              <div className="bg-teal-700 p-1.5 sm:p-1.5 rounded-full">
+                <Stethoscope size={18} className="text-white sm:size-4" />
               </div>
-              <h3 className="font-medium text-xs sm:text-base">MediNexus Assistant</h3>
+              <h3 className="font-medium text-sm sm:text-base">MediNexus Assistant</h3>
             </div>
             <button
               onClick={toggleChat}
-              className="text-white hover:text-teal-300 transition-colors"
+              className="text-white hover:text-teal-300 transition-colors p-1"
               aria-label="Close chat"
             >
-              <X size={16} className="size-4 sm:size-6" />
+              <X size={20} className="size-5 sm:size-6" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4 max-h-[300px] sm:max-h-[400px] bg-teal-950/90 bg-fixed bg-center">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-h-[350px] sm:max-h-[400px] bg-teal-950/90 bg-fixed bg-center">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 {message.role === "assistant" && (
-                  <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-1 sm:mr-2 mt-1 flex-shrink-0">
-                    <Stethoscope size={12} className="text-white sm:size-4" />
+                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                    <Stethoscope size={16} className="text-white sm:size-4" />
                   </div>
                 )}
                 <div className="flex flex-col">
                   <div
-                    className={`max-w-[80%] p-2 sm:p-3 rounded-lg shadow-md text-xs sm:text-sm ${message.role === "user"
-                      ? "bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-br-none pr-4 sm:pr-8"
-                      : "bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 rounded-bl-none"
-                      }`}
+                    className={`max-w-[85%] p-3 rounded-lg shadow-md text-sm ${
+                      message.role === "user"
+                        ? "bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-br-none pr-4 sm:pr-8"
+                        : "bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 rounded-bl-none"
+                    }`}
                   >
                     {message.content}
                   </div>
@@ -640,52 +641,52 @@ export default function Navbar() {
                   </div>
                 </div>
                 {message.role === "user" && (
-                  <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-teal-600 flex items-center justify-center ml-1 sm:ml-2 mt-1 flex-shrink-0">
-                    <Users size={12} className="text-white sm:size-4" />
+                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-600 flex items-center justify-center ml-2 mt-1 flex-shrink-0">
+                    <Users size={16} className="text-white sm:size-4" />
                   </div>
                 )}
               </div>
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-1 sm:mr-2 flex-shrink-0">
-                  <Stethoscope size={12} className="text-white sm:size-4" />
+                <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-2 flex-shrink-0">
+                  <Stethoscope size={16} className="text-white sm:size-4" />
                 </div>
-                <div className="bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 p-2 sm:p-3 rounded-lg rounded-bl-none shadow-md">
-                  <div className="flex space-x-1">
+                <div className="bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 p-3 rounded-lg rounded-bl-none shadow-md">
+                  <div className="flex space-x-2">
                     <div
-                      className="h-1.5 w-1.5 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     ></div>
                     <div
-                      className="h-1.5 w-1.5 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     ></div>
                     <div
-                      className="h-1.5 w-1.5 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     ></div>
                   </div>
                 </div>
               </div>
             )}
-            <div className="h-2 sm:h-4" id="chat-end"></div>
+            <div className="h-4" id="chat-end"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-gray-900 flex gap-2 bg-teal-950">
+          <form onSubmit={handleSubmit} className="p-3 sm:p-4 border-t border-gray-900 flex gap-2 bg-teal-950">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 bg-teal-800 border border-teal-700/50 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-md focus:outline-none focus:border-teal-500 placeholder-teal-300/50 text-xs sm:text-base"
+              className="flex-1 bg-teal-800 border border-teal-700/50 text-white px-3 py-2.5 rounded-md focus:outline-none focus:border-teal-500 placeholder-teal-300/50 text-sm sm:text-base"
             />
             <button
               type="submit"
-              className="bg-teal-600 hover:bg-teal-700 text-white p-1.5 sm:p-2 rounded-md disabled:opacity-50 transition-colors"
+              className="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-md disabled:opacity-50 transition-colors"
               disabled={!input.trim()}
             >
-              <Send size={14} className="sm:size-4" />
+              <Send size={18} className="sm:size-4" />
             </button>
           </form>
         </div>
