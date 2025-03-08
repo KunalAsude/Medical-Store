@@ -35,40 +35,64 @@ export default function ProductPage() {
   if (!product) return <p className="text-center mt-10 text-red-600">Product not found.</p>;
 
   return (
-    <div className="container mx-auto p-6">
-    <div className="overflow-hidden mx-auto p-6 grid md:grid-cols-2 gap-8">
-      {/* ✅ Product Image */}
-      <div className="relative  w-full h-150  overflow-hidden rounded-xl  shadow-md hover:shadow-lg bg-gray-400">
-        <Image src={product.images?.[0]?.url || '/fallback.jpg'} alt={product.name} layout="fill" objectFit="cover" className="rounded-2xl p-2 h-16" />
+    <div className="container mx-auto px-4 py-10 sm:px-6 ">
+    <div className="flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-8 sm:h-155 ">
+      <div className="relative w-full sm:h-130 aspect-square rounded-xl shadow-md hover:shadow-lg bg-gray-100">
+        <Image
+          src={product.images?.[0]?.url || '/fallback.jpg'}
+          alt={product.name}
+          layout="fill"
+          objectFit="cover"
+          className="rounded-2xl h-16"
+        />
       </div>
 
-      {/* ✅ Product Details */}
-      <div className='flex flex-col justify-start space-y-3'>
-        <h1 className="text-2xl font-bold mb-5">{product.name}</h1>
-        <p className="text-gray-400 mb-5">{product.description}</p>
+      <div className="flex flex-col space-y-4">
+        <h1 className="text-xl sm:text-2xl font-bold">{product.name}</h1>
+        <p className="text-gray-600 text-sm sm:text-base">{product.description}</p>
 
-        {/* ✅ Star Rating */}
-        <div className="flex items-center mb-5">
+        <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
-            <FaStar key={i} className={`text-${i < Math.round(product.averageRating) ? 'bg-amber-400' : 'gray'}-400`} />
+            <FaStar 
+              key={i} 
+              className={i < Math.round(product.averageRating) ? 'text-amber-400' : 'text-gray-300'}
+            />
           ))}
-          <span className="ml-2 text-amber-300">({product.reviewCount} reviews)</span>
+          <span className="ml-2 text-sm text-gray-600">({product.reviewCount} reviews)</span>
         </div>
 
-        {/* ✅ Price */}
-        <p className="text-xl font-semibold text-green-600">₹ {product.price.toFixed(2)}</p>
+        <p className="text-lg sm:text-xl font-semibold text-green-600">₹ {product.price.toFixed(2)}</p>
 
-        {/* ✅ Quantity Selector */}
-        <div className="flex items-center mt-4 ">
-          <Button className='cursor-pointer' onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity === 1}>-</Button>
-          <span className="mx-4 text-lg cursor-default">{quantity}</span>
-          <Button className='cursor-pointer' onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))} disabled={quantity === maxQuantity} >+</Button>
+        <div className="flex items-center">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            disabled={quantity === 1}
+            className="h-8 w-8"
+          >
+            -
+          </Button>
+          <span className="mx-4 text-lg">{quantity}</span>
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+            disabled={quantity === maxQuantity}
+            className="h-8 w-8"
+          >
+            +
+          </Button>
         </div>
 
-        {/* ✅ Add to Cart Button */}
-        <Button className="mt-4 w-full bg-teal-800 hover:bg-teal-900 text-white cursor-pointer">Add to Cart</Button>
+        <Button 
+          className="w-full bg-teal-800 hover:bg-teal-900 text-white mt-4"
+          size="lg"
+        >
+          Add to Cart
+        </Button>
       </div>
     </div>
-    </div>
+  </div>
   );
 }

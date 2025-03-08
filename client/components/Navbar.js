@@ -336,10 +336,10 @@ export default function Navbar() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        
+
 
         <div className="flex items-center gap-5">
-        <button
+          <button
             onClick={() => {
               if (recognition) {
                 if (isListening) {
@@ -351,13 +351,13 @@ export default function Navbar() {
                 }
               }
             }}
-            className={`p-2 mb-2 rounded-full ${isListening ? "bg-red-500/20 text-red-400" : "bg-teal-800/30 hover:bg-teal-800/50"} transition-colors  `}
+            className={`p-2 mb-2 rounded-full ${isListening ? "bg-red-500/20 text-red-400" : "bg-teal-900 hover:bg-[#05384a]"} transition-colors cursor-pointer  `}
             aria-label={isListening ? "Stop listening" : "Start voice assistant"}
           >
             {isListening ? <MicOff size={20} className="text-red-400" /> : <Mic size={20} className="text-teal-300" />}
           </button>
           <Link href="/cart" className="relative">
-            <Button variant="ghost" size="icon" className="relative hover:bg-teal-700">
+            <Button variant="ghost" size="icon" className="relative hover:bg-teal-700 cursor-pointer">
               <ShoppingCart className="h-10 w-10 text-white" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-rose-500 hover:bg-rose-600">
                 {cartItemCount}
@@ -366,11 +366,11 @@ export default function Navbar() {
             </Button>
           </Link>
 
-          
+
 
           <HoverCard>
             <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="hover:bg-teal-700">
+              <Button variant="ghost" size="icon" className="hover:bg-teal-700 cursor-pointer">
                 <User className="h-10 w-10 text-white font-bold" />
                 <span className="sr-only">Account</span>
               </Button>
@@ -568,8 +568,8 @@ export default function Navbar() {
 
                   <Separator className="bg-teal-900" />
 
-           
-                  
+
+
 
                   <SheetClose asChild>
                     <Link
@@ -590,8 +590,8 @@ export default function Navbar() {
       {/* Chat Button */}
       <button
         onClick={toggleChat}
-        className={`fixed sm:top-160 top-160 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-float
-                ${isChatOpen ? "bg-red-500 hover:bg-red-600" : "bg-black hover:bg-gray-800"}`}
+        className={`fixed sm:top-160 top-160 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-float cursor-pointer
+                ${isChatOpen ? "bg-red-500 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-700"}`}
         aria-label={isChatOpen ? "Close chat" : "Open chat"}
       >
         {isChatOpen ? <X size={24} className="text-white" /> : <MessageSquare size={24} className="text-white" />}
@@ -599,49 +599,50 @@ export default function Navbar() {
 
       {/* Chat Window */}
       {isChatOpen && (
-        <div className="fixed sm:top-40 top-60 right-5 w-[85%] sm:w-[400px] bg-gradient-to-b from-teal-900 to-teal-950 rounded-lg shadow-xl z-50 flex flex-col overflow-hidden border border-teal-700/50 max-h-[90vh] sm:max-h-[600px] hide-scrollbar">
-          <div className="p-3 sm:p-4 bg-gradient-to-r from-teal-950 to-teal-950 text-white flex justify-between items-center border-b border-gray-900 hide-scrollbar">
+        <div className="fixed sm:top-40 top-60 right-5 w-[85%] sm:w-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-xl z-50 flex flex-col overflow-hidden border border-gray-200 dark:border-gray-800 max-h-[90vh] sm:max-h-[600px] hide-scrollbar">
+          {/* Header */}
+          <div className="p-3 sm:p-4 bg-[#05384a] text-[#F8FAFC] flex justify-between items-center border-b border-[#1E293B]">
             <div className="flex items-center space-x-3">
-              <div className="bg-teal-700 p-1.5 sm:p-1.5 rounded-full">
+              <div className="bg-indigo-500 p-1.5 sm:p-1.5 rounded-full">
                 <Stethoscope size={18} className="text-white sm:size-4" />
               </div>
-              <h3 className="font-medium text-sm sm:text-base">MediNexus Assistant</h3>
+              <h3 className="font-medium text-sm sm:text-base">MediStore Assistant</h3>
             </div>
             <button
               onClick={toggleChat}
-              className="text-white hover:text-teal-300 transition-colors p-1"
+              className="text-white hover:text-indigo-200 transition-colors p-1"
               aria-label="Close chat"
             >
               <X size={20} className="size-5 sm:size-6" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-h-[350px] sm:max-h-[400px] bg-teal-950/90 bg-fixed bg-center">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-h-[350px] sm:max-h-[400px] bg-gray-50 dark:bg-gray-900">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 {message.role === "assistant" && (
-                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
                     <Stethoscope size={16} className="text-white sm:size-4" />
                   </div>
                 )}
                 <div className="flex flex-col">
                   <div
-                    className={`max-w-[85%] p-3 rounded-lg shadow-md text-sm ${
-                      message.role === "user"
-                        ? "bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-br-none pr-4 sm:pr-8"
-                        : "bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 rounded-bl-none"
-                    }`}
+                    className={`max-w-[85%] p-3 rounded-lg shadow-sm text-sm ${message.role === "user"
+                        ? "bg-indigo-600 text-white rounded-br-none"
+                        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-700"
+                      }`}
                   >
                     {message.content}
                   </div>
                   <div
-                    className={`text-xs mt-1 text-teal-400/70 ${message.role === "user" ? "text-right" : "text-left"}`}
+                    className={`text-xs mt-1 text-gray-500 dark:text-gray-400 ${message.role === "user" ? "text-right" : "text-left"}`}
                   >
                     {message.timestamp}
                   </div>
                 </div>
                 {message.role === "user" && (
-                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-600 flex items-center justify-center ml-2 mt-1 flex-shrink-0">
+                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-500 flex items-center justify-center ml-2 mt-1 flex-shrink-0">
                     <Users size={16} className="text-white sm:size-4" />
                   </div>
                 )}
@@ -649,21 +650,21 @@ export default function Navbar() {
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-teal-700 flex items-center justify-center mr-2 flex-shrink-0">
+                <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0">
                   <Stethoscope size={16} className="text-white sm:size-4" />
                 </div>
-                <div className="bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 p-3 rounded-lg rounded-bl-none shadow-md">
+                <div className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-3 rounded-lg rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-700">
                   <div className="flex space-x-2">
                     <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     ></div>
                     <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     ></div>
                     <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-teal-400 rounded-full animate-bounce"
+                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     ></div>
                   </div>
@@ -673,17 +674,21 @@ export default function Navbar() {
             <div className="h-4" id="chat-end"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-3 sm:p-4 border-t border-gray-900 flex gap-2 bg-teal-950">
+          {/* Input Area */}
+          <form
+            onSubmit={handleSubmit}
+            className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-white dark:bg-gray-900"
+          >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 bg-teal-800 border border-teal-700/50 text-white px-3 py-2.5 rounded-md focus:outline-none focus:border-teal-500 placeholder-teal-300/50 text-sm sm:text-base"
+              className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white px-3 py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
             />
             <button
               type="submit"
-              className="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-md disabled:opacity-50 transition-colors"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-md disabled:opacity-50 transition-colors"
               disabled={!input.trim()}
             >
               <Send size={18} className="sm:size-4" />

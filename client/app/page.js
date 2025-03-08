@@ -170,14 +170,18 @@ export default function Home() {
               key={index}
               className={`absolute inset-0 transition-opacity duration-1000 ${activeSlide === index ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent z-10"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent z-10 border border-gray-900"></div>
               <Image
-                src={slide.image || "/placeholder.svg"}
-                alt={slide.title}
-                fill
-                className="object-cover"
-                priority={index === 0}
-              />
+              src={slide.image || "/placeholder.svg"}
+              alt={slide.title}
+              fill
+              className="object-cover"
+              priority={index === 0}
+              quality={100}
+              sizes="(max-width: 768px) 100vw, 100vw"
+              placeholder="blur"
+              blurDataURL={slide.image || "/placeholder.svg"}
+            />
               <div className="relative z-20 h-full flex flex-col justify-center p-8 md:p-16 max-w-2xl">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{slide.title}</h1>
                 <p className="text-lg mb-8 text-white/90">{slide.subtitle}</p>
@@ -215,28 +219,28 @@ export default function Home() {
         {/* Quick Services */}
         <section className="mb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg">
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border border-gray-800">
               <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
                 <Truck className="h-6 w-6" />
               </div>
               <h3 className="font-semibold">Free Delivery</h3>
               <p className="text-sm text-gray-300">On orders above ₹500</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg">
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
               <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-6 w-6" />
               </div>
               <h3 className="font-semibold">24/7 Support</h3>
               <p className="text-sm text-gray-300">Healthcare assistance</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg">
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
               <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
                 <Shield className="h-6 w-6" />
               </div>
               <h3 className="font-semibold">Genuine Products</h3>
               <p className="text-sm text-gray-300">100% authentic items</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg">
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
               <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
                 <Award className="h-6 w-6" />
               </div>
