@@ -1,9 +1,8 @@
 "use client"
 
-import React from "react"
-
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
 import {
   ShoppingCart,
   User,
@@ -22,11 +21,8 @@ import {
   Heart,
   LogOut,
   MessageSquare,
-  X,
-  Send,
   Mic,
   MicOff,
-  Users,
 } from "lucide-react"
 import Image from "next/image"
 import {
@@ -50,7 +46,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar"
 import { useCart } from "@/context/CartContext"
 import { getCurrentUser, logoutUser } from "@/lib/actions/authActions"
-
 
 // Data transformation function
 const transformCategories = (categories) => {
@@ -80,29 +75,24 @@ const transformCategories = (categories) => {
 }
 
 export default function Navbar() {
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Check if we're on the chat page first, before any other hooks
+  // are initialized
+  if (pathname === "/chat") {
+    return null
+  }
+
   const [openCategory, setOpenCategory] = useState(null)
   const [categories, setCategories] = useState([])
   const { getCartItemCount } = useCart()
   const [cartItemCount, setCartItemCount] = useState(0)
-
-  // Add a state for user authentication status
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState({})
-
-  // Chatbot states
-  const [isChatOpen, setIsChatOpen] = useState(false)
   const [isListening, setIsListening] = useState(false)
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      content: "Hello! How can I help you with your healthcare needs today?",
-      role: "assistant",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ])
-  const [input, setInput] = useState("")
   const [recognition, setRecognition] = useState(null)
-  const [isTyping, setIsTyping] = useState(false)
+  const [transcript, setTranscript] = useState("")
 
   useEffect(() => {
     const get = async () => {
@@ -132,19 +122,34 @@ export default function Navbar() {
 
       if (SpeechRecognition) {
         const recognitionInstance = new SpeechRecognition()
-        recognitionInstance.continuous = true
-        recognitionInstance.interimResults = true
+        recognitionInstance.continuous = false // Ensure it stops after one result
+        recognitionInstance.interimResults = false // Only get final results to prevent multiple outputs
+        recognitionInstance.lang = "en-US" // Set language explicitly
+
+        recognitionInstance.onstart = () => {
+          console.log("Speech recognition started")
+          setIsListening(true)
+        }
 
         recognitionInstance.onresult = (event) => {
           const current = event.resultIndex
-          const result = event.results[current]
-          const transcriptText = result[0].transcript
+          const transcriptText = event.results[current][0].transcript
+          console.log("Speech recognized:", transcriptText)
 
-          if (result.isFinal) {
-            handleVoiceInput(transcriptText)
-            setIsListening(false)
-            recognitionInstance.stop()
+          // Set the transcript state
+          setTranscript(transcriptText)
+
+          // Handle the voice input and redirect
+          if (transcriptText.trim()) {
+            // Use router.push with a callback to ensure navigation completes
+            console.log("Redirecting to chat with:", transcriptText)
+            router.push(`/chat?message=${encodeURIComponent(transcriptText)}&source=navbar`)
           }
+        }
+
+        recognitionInstance.onend = () => {
+          console.log("Speech recognition ended")
+          setIsListening(false)
         }
 
         recognitionInstance.onerror = (event) => {
@@ -153,9 +158,11 @@ export default function Navbar() {
         }
 
         setRecognition(recognitionInstance)
+      } else {
+        console.warn("Speech Recognition is not supported in this browser")
       }
     }
-  }, [])
+  }, [router])
 
   const toggleCategory = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName)
@@ -172,70 +179,25 @@ export default function Navbar() {
     logout()
   }
 
-  // Chatbot functions
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen)
+  // Handle chat button click - redirect to chat page
+  const handleChatClick = () => {
+    router.push("/chat")
   }
 
-  const handleVoiceInput = (transcript) => {
-    if (transcript.trim()) {
-      addMessage(transcript, "user")
-      // Open chat window if it's closed
-      if (!isChatOpen) {
-        setIsChatOpen(true)
+  // Toggle listening function
+  const toggleListening = () => {
+    if (recognition) {
+      if (isListening) {
+        recognition.stop()
+      } else {
+        try {
+          recognition.start()
+        } catch (error) {
+          console.error("Error starting speech recognition:", error)
+        }
       }
-    }
-  }
-
-  const addMessage = (content, role) => {
-    const newMessage = {
-      id: Date.now().toString(),
-      content,
-      role,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    }
-    setMessages((prev) => [...prev, newMessage])
-
-    // Simple bot response
-    if (role === "user") {
-      // Show typing indicator
-      setIsTyping(true)
-
-      setTimeout(() => {
-        let response =
-          "I'll help you with that. Is there anything specific you'd like to know about our products or services?"
-
-        // Simple keyword matching for demo purposes
-        if (content.toLowerCase().includes("appointment")) {
-          response =
-            "Would you like to schedule an appointment? You can visit our MediNexus platform for hospital appointments."
-        } else if (content.toLowerCase().includes("emergency")) {
-          response =
-            "For medical emergencies, please call our emergency hotline or visit your nearest MediNexus hospital immediately."
-        } else if (content.toLowerCase().includes("doctor") || content.toLowerCase().includes("specialist")) {
-          response = "We have specialists in various fields. You can find them by visiting our MediNexus platform."
-        } else if (content.toLowerCase().includes("medicine") || content.toLowerCase().includes("product")) {
-          response =
-            "We offer a wide range of medical products. You can browse our catalog or let me know what specific product you're looking for."
-        }
-
-        const botResponse = {
-          id: (Date.now() + 1).toString(),
-          content: response,
-          role: "assistant",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        }
-        setMessages((prev) => [...prev, botResponse])
-        setIsTyping(false)
-      }, 1500)
-    }
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (input.trim()) {
-      addMessage(input, "user")
-      setInput("")
+    } else {
+      console.warn("Speech recognition not available")
     }
   }
 
@@ -254,6 +216,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-b-gray-900 bg-teal-950 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <style>{floatAnimation}</style>
       <div className="container flex h-[4.5rem] items-center justify-between mg:flex md:justify-between md:gap-10">
         <div className="flex items-center gap-3 ml-5">
           <Link href="/" className="flex items-center gap-2">
@@ -333,29 +296,27 @@ export default function Navbar() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <Link href="/chat" legacyBehavior passHref>
+                <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-white hover:bg-teal-900`}>
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Chat Assistant
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
-
-
         <div className="flex items-center gap-5">
           <button
-            onClick={() => {
-              if (recognition) {
-                if (isListening) {
-                  recognition.stop()
-                  setIsListening(false)
-                } else {
-                  recognition.start()
-                  setIsListening(true)
-                }
-              }
-            }}
-            className={`p-2 mb-2 rounded-full ${isListening ? "bg-red-500/20 text-red-400" : "bg-teal-900 hover:bg-[#05384a]"} transition-colors cursor-pointer  `}
+            onClick={toggleListening}
+            className={`p-2 rounded-full ${isListening ? "bg-red-500/20 text-red-400" : "bg-cyan-900 hover:bg-teal-800/50"} transition-colors`}
             aria-label={isListening ? "Stop listening" : "Start voice assistant"}
           >
             {isListening ? <MicOff size={20} className="text-red-400" /> : <Mic size={20} className="text-teal-300" />}
           </button>
+          {isListening && <div className="hidden md:block text-sm italic text-teal-300">Listening...</div>}
           <Link href="/cart" className="relative">
             <Button variant="ghost" size="icon" className="relative hover:bg-teal-700 cursor-pointer">
               <ShoppingCart className="h-10 w-10 text-white" />
@@ -365,8 +326,6 @@ export default function Navbar() {
               <span className="sr-only">Shopping cart</span>
             </Button>
           </Link>
-
-
 
           <HoverCard>
             <HoverCardTrigger asChild>
@@ -566,10 +525,17 @@ export default function Navbar() {
                     </Link>
                   </SheetClose>
 
+                  <SheetClose asChild>
+                    <Link
+                      href="/chat"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-teal-800 text-white"
+                    >
+                      <MessageSquare className="h-4 w-4 text-white" />
+                      Chat Assistant
+                    </Link>
+                  </SheetClose>
+
                   <Separator className="bg-teal-900" />
-
-
-
 
                   <SheetClose asChild>
                     <Link
@@ -587,115 +553,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Chat Button */}
-      <button
-        onClick={toggleChat}
-        className={`fixed sm:top-160 top-160 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-float cursor-pointer
-                ${isChatOpen ? "bg-red-500 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-700"}`}
-        aria-label={isChatOpen ? "Close chat" : "Open chat"}
-      >
-        {isChatOpen ? <X size={24} className="text-white" /> : <MessageSquare size={24} className="text-white" />}
-      </button>
-
-      {/* Chat Window */}
-      {isChatOpen && (
-        <div className="fixed sm:top-40 top-60 right-5 w-[85%] sm:w-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-xl z-50 flex flex-col overflow-hidden border border-gray-200 dark:border-gray-800 max-h-[90vh] sm:max-h-[600px] hide-scrollbar">
-          {/* Header */}
-          <div className="p-3 sm:p-4 bg-[#05384a] text-[#F8FAFC] flex justify-between items-center border-b border-[#1E293B]">
-            <div className="flex items-center space-x-3">
-              <div className="bg-indigo-500 p-1.5 sm:p-1.5 rounded-full">
-                <Stethoscope size={18} className="text-white sm:size-4" />
-              </div>
-              <h3 className="font-medium text-sm sm:text-base">MediStore Assistant</h3>
-            </div>
-            <button
-              onClick={toggleChat}
-              className="text-white hover:text-indigo-200 transition-colors p-1"
-              aria-label="Close chat"
-            >
-              <X size={20} className="size-5 sm:size-6" />
-            </button>
-          </div>
-
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-h-[350px] sm:max-h-[400px] bg-gray-50 dark:bg-gray-900">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                {message.role === "assistant" && (
-                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                    <Stethoscope size={16} className="text-white sm:size-4" />
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <div
-                    className={`max-w-[85%] p-3 rounded-lg shadow-sm text-sm ${message.role === "user"
-                        ? "bg-indigo-600 text-white rounded-br-none"
-                        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-700"
-                      }`}
-                  >
-                    {message.content}
-                  </div>
-                  <div
-                    className={`text-xs mt-1 text-gray-500 dark:text-gray-400 ${message.role === "user" ? "text-right" : "text-left"}`}
-                  >
-                    {message.timestamp}
-                  </div>
-                </div>
-                {message.role === "user" && (
-                  <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-500 flex items-center justify-center ml-2 mt-1 flex-shrink-0">
-                    <Users size={16} className="text-white sm:size-4" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0">
-                  <Stethoscope size={16} className="text-white sm:size-4" />
-                </div>
-                <div className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 p-3 rounded-lg rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-700">
-                  <div className="flex space-x-2">
-                    <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "0ms" }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "150ms" }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 sm:h-2 sm:w-2 bg-indigo-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "300ms" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="h-4" id="chat-end"></div>
-          </div>
-
-          {/* Input Area */}
-          <form
-            onSubmit={handleSubmit}
-            className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-white dark:bg-gray-900"
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white px-3 py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
-            />
-            <button
-              type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-md disabled:opacity-50 transition-colors"
-              disabled={!input.trim()}
-            >
-              <Send size={18} className="sm:size-4" />
-            </button>
-          </form>
-        </div>
-      )}
+      {/* Only show "Listening..." indicator, not the transcript */}
+      {isListening && <div className="md:hidden bg-teal-900 p-2 text-teal-300 text-sm text-center">Listening...</div>}
     </header>
   )
 }

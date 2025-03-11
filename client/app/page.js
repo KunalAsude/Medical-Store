@@ -16,12 +16,24 @@ import {
   Star,
   Search,
   Menu,
+  CreditCard,
+  Facebook,
+  Instagram,
+  Twitter,
+  MapPin,
+  Mail,
+  Send,
+  Linkedin,
+  Youtube,
+  ChevronUp
 } from "lucide-react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { getAllCategories } from "@/lib/actions/categoryActions"
 import { getAllProducts } from "@/lib/actions/productActions"
 import ProductCard from "@/components/ProductCard"
+import { Input } from "@/components/ui/input"
+
 
 export default function Home() {
   // State for dynamic elements
@@ -31,7 +43,27 @@ export default function Home() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [bestSellers, setBestSellers] = useState([])
+  const [isMobile, setIsMobile] = useState(false)
 
+  // Featured Brands section
+  const featuredBrands = [
+    { name: "Cipla", logo: "/brands/cipla.svg" },
+    { name: "Sun Pharma", logo: "/brands/sunpharma.svg" },
+    { name: "Dr. Reddy's", logo: "/brands/drreddys.svg" },
+    { name: "Himalaya", logo: "/brands/himalaya.svg" },
+    { name: "Dabur", logo: "/brands/dabur.svg" },
+    { name: "Abbott", logo: "/brands/abbott.svg" }
+  ]
+
+  // Payment Methods
+  const paymentMethods = [
+    { name: "Visa", icon: "visa.svg" },
+    { name: "Mastercard", icon: "mastercard.svg" },
+    { name: "American Express", icon: "amex.svg" },
+    { name: "PayPal", icon: "paypal.svg" },
+    { name: "UPI", icon: "upi.svg" },
+    { name: "Net Banking", icon: "netbanking.svg" }
+  ]
 
   // Health tips
   const healthTips = [
@@ -108,6 +140,22 @@ export default function Home() {
     },
   ]
 
+  // Check if on mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkIfMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   // Scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -130,16 +178,13 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [])
 
-  // Function to handle adding to cart with animation
+ 
   const handleAddToCart = (e, productId) => {
     e.preventDefault()
-    // Add animation class to button
     e.currentTarget.classList.add("animate-pulse")
-    // Remove animation after 1 second
     setTimeout(() => {
       e.currentTarget.classList.remove("animate-pulse")
     }, 1000)
-    // Here you would add actual cart functionality
     console.log(`Added product ${productId} to cart`)
   }
 
@@ -147,7 +192,6 @@ export default function Home() {
     Promise.all([
       getAllCategories().then((data) => setCategories(data)),
       getAllProducts().then((data) => {
-        // Set all products
         setProducts(data);
 
         const filteredBestSellers = data.filter(product => product.isBestSeller);
@@ -156,39 +200,44 @@ export default function Home() {
     ]);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
+
 
   return (
     <div className="min-h-screen">
-      {/* Sticky Header */}
-
-
+      
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section with Carousel */}
-        <section className="relative h-[500px] mb-12 rounded-xl overflow-hidden">
+        <section className="relative h-[500px] mb-12 rounded-xl overflow-hidden shadow-lg">
           {heroSlides.map((slide, index) => (
             <div
               key={index}
               className={`absolute inset-0 transition-opacity duration-1000 ${activeSlide === index ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent z-10 border border-gray-900"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent z-10"></div>
               <Image
-              src={slide.image || "/placeholder.svg"}
-              alt={slide.title}
-              fill
-              className="object-cover"
-              priority={index === 0}
-              quality={100}
-              sizes="(max-width: 768px) 100vw, 100vw"
-              placeholder="blur"
-              blurDataURL={slide.image || "/placeholder.svg"}
-            />
+                src={slide.image || "/placeholder.svg"}
+                alt={slide.title}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                quality={100}
+                sizes="(max-width: 768px) 100vw, 100vw"
+                placeholder="blur"
+                blurDataURL={slide.image || "/placeholder.svg"}
+              />
               <div className="relative z-20 h-full flex flex-col justify-center p-8 md:p-16 max-w-2xl">
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{slide.title}</h1>
+                <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">{slide.title}</h1>
                 <p className="text-lg mb-8 text-white/90">{slide.subtitle}</p>
                 <div className="flex flex-wrap gap-4">
                   <Link
                     href="/products"
-                    className="inline-block bg-teal-600 text-white font-medium px-6 py-3 rounded-md hover:bg-teal-700 "
+                    className="inline-block bg-teal-600 text-white font-medium px-6 py-3 rounded-md hover:bg-teal-700 transition-colors"
                   >
                     {slide.cta}
                   </Link>
@@ -219,30 +268,30 @@ export default function Home() {
         {/* Quick Services */}
         <section className="mb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border border-gray-800">
-              <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                <Truck className="h-6 w-6" />
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white hover:shadow-xl transition-all duration-300 border border-teal-900">
+              <div className="bg-teal-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-3">
+                <Truck className="h-5 w-5" />
               </div>
               <h3 className="font-semibold">Free Delivery</h3>
               <p className="text-sm text-gray-300">On orders above ₹500</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
-              <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                <Clock className="h-6 w-6" />
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white hover:shadow-xl transition-all duration-300 border border-teal-900">
+              <div className="bg-teal-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-3">
+                <Clock className="h-5 w-5" />
               </div>
               <h3 className="font-semibold">24/7 Support</h3>
               <p className="text-sm text-gray-300">Healthcare assistance</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
-              <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                <Shield className="h-6 w-6" />
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white hover:shadow-xl transition-all duration-300 border border-teal-900">
+              <div className="bg-teal-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-3">
+                <Shield className="h-5 w-5" />
               </div>
               <h3 className="font-semibold">Genuine Products</h3>
               <p className="text-sm text-gray-300">100% authentic items</p>
             </div>
-            <div className="bg-teal-950 rounded-lg p-4 text-center text-white  hover:shadow-lg border-gray-800 border">
-              <div className="bg-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                <Award className="h-6 w-6" />
+            <div className="bg-teal-950 rounded-lg p-4 text-center text-white hover:shadow-xl transition-all duration-300 border border-teal-900">
+              <div className="bg-teal-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-3">
+                <Award className="h-5 w-5" />
               </div>
               <h3 className="font-semibold">Quality Assured</h3>
               <p className="text-sm text-gray-300">Certified products</p>
@@ -250,7 +299,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Categories */}
+        {/* Featured Categories - Responsive: show only 4 on mobile */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Shop by Category</h2>
@@ -261,30 +310,60 @@ export default function Home() {
               All Categories <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories.slice(0, 4).map((category, index) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {categories.slice(0, isMobile ? 4 : 6).map((category, index) => (
               <Link key={index} href={`/category/${category?._id}`} className="group">
-                <div className="bg-teal-950 rounded-lg shadow-md overflow-hidden">
-                  <div className="relative h-40 md:h-48 lg:h-56">
-                    <Image
+                <div className="bg-teal-950 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-teal-900/50">
+                  <div className="relative h-28 md:h-32">
+                    {/* <Image
                       src={category?.image || "/placeholder.svg"}
                       alt={category?.name}
                       fill
                       className="rounded-t-lg object-cover p-2"
-                    />
+                    /> */}
                   </div>
-                  <div className="p-4 text-center">
-                    <h3 className="font-medium text-white group-hover:text-teal-300 transition-colors">
+                  <div className="p-2 text-center">
+                    <h3 className="font-medium text-sm text-white group-hover:text-teal-300 transition-colors">
                       {category?.name}
                     </h3>
                   </div>
                 </div>
               </Link>
             ))}
-
           </div>
         </section>
 
+        {/* Featured Brands - Responsive: show only 4 on mobile */}
+        <section className="mb-12 bg-teal-950/30 rounded-xl p-6 border border-teal-900/20">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Featured Brands</h2>
+            <Link
+              href="/brands"
+              className="text-teal-600 hover:text-teal-800 flex items-center text-sm font-medium"
+            >
+              View All <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+            {featuredBrands.slice(0, isMobile ? 4 : 6).map((brand, index) => (
+              <Link key={index} href={`/brands/${brand.name.toLowerCase()}`} className="group">
+                <div className="bg-white rounded-full p-4 flex items-center justify-center h-24 hover:shadow-md transition-all">
+                  <div className="relative h-16 w-24">
+                    <Image
+                      src={brand.logo || "/placeholder.svg"}
+                      alt={brand.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Rest of the code remains unchanged */}
+        
         {/* Featured Products */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
@@ -324,7 +403,7 @@ export default function Home() {
 
         {/* Special Offers Banner */}
         <section className="mb-12">
-          <div className="bg-gradient-to-r from-teal-950 to-teal-800 rounded-lg p-6 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-teal-950 to-teal-800 rounded-lg p-6 text-white relative overflow-hidden shadow-lg border border-teal-900/50">
             <div className="absolute top-0 right-0 w-64 h-64 bg-teal-700 rounded-full -translate-y-1/2 translate-x-1/4 opacity-30"></div>
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-700 rounded-full translate-y-1/2 -translate-x-1/4 opacity-30"></div>
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between">
@@ -333,11 +412,11 @@ export default function Home() {
                 <p className="mb-4 max-w-md">
                   Get 15% off on our comprehensive health checkup packages. Limited time offer!
                 </p>
-                <Button className="bg-white text-teal-800 hover:bg-gray-100 transition-all hover:shadow-lg transform hover:scale-105">
+                <Button className="bg-white text-teal-800 hover:bg-gray-100 transition-all hover:shadow-lg">
                   Book Now
                 </Button>
               </div>
-              <div className="text-5xl font-bold bg-amber-400 text-teal-950 px-6 py-3 rounded-lg transform rotate-3 hover:rotate-0 transition-transform">
+              <div className="text-4xl font-bold bg-amber-400 text-teal-950 px-6 py-3 rounded-lg shadow-lg">
                 15% OFF
               </div>
             </div>
@@ -356,7 +435,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestSellers.map((product) => (
+            {bestSellers.slice(0, 4).map((product) => (
               <ProductCard
                 key={product._id}
                 id={product._id}
@@ -399,14 +478,14 @@ export default function Home() {
             {healthTips.map((tip, index) => (
               <div
                 key={index}
-                className="bg-teal-950 rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300"
+                className="bg-teal-950 rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 border border-teal-900/50"
               >
                 <div className="relative h-48">
                   <Image
                     src={tip.image || "/placeholder.svg"}
                     alt={tip.title}
                     fill
-                    className="object-cover transition-transform duration-500 "
+                    className="object-cover transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-teal-950 to-transparent opacity-60"></div>
                 </div>
@@ -428,10 +507,10 @@ export default function Home() {
         </section>
 
         {/* Benefits Section */}
-        <section className="bg-teal-950 rounded-lg p-8 mb-12">
+        <section className="bg-teal-950 rounded-lg p-8 mb-12 shadow-lg border border-teal-900/50">
           <h2 className="text-2xl font-bold mb-8 text-center text-white">Why Choose Us</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center ">
+            <div className="text-center">
               <div className="bg-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Shield className="h-8 w-8 text-white" />
               </div>
@@ -440,14 +519,14 @@ export default function Home() {
                 All our products are sourced from trusted manufacturers and meet strict quality standards.
               </p>
             </div>
-            <div className="text-center ">
+            <div className="text-center">
               <div className="bg-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Truck className="h-8 w-8 text-white" />
               </div>
               <h3 className="font-bold mb-2 text-white">Fast Delivery</h3>
               <p className="text-gray-300">Get your health essentials delivered to your doorstep within 24-48 hours.</p>
             </div>
-            <div className="text-center ">
+            <div className="text-center">
               <div className="bg-teal-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Phone className="h-8 w-8 text-white" />
               </div>
@@ -466,7 +545,7 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-teal-950 rounded-lg p-6 shadow-md hover:shadow-xl transition-all duration-300"
+                className="bg-teal-950 rounded-lg p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-teal-900/50"
               >
                 <div className="flex items-center mb-4">
                   <div className="relative w-12 h-12 mr-4">
@@ -494,7 +573,7 @@ export default function Home() {
         </section>
 
         {/* Newsletter */}
-        <section className="mb-12 bg-gradient-to-r from-teal-950 to-teal-800 rounded-lg p-8 relative overflow-hidden">
+        <section className="mb-12 bg-gradient-to-r from-teal-950 to-teal-800 rounded-lg p-8 relative overflow-hidden shadow-lg border border-teal-900/50">
           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-700 rounded-full -translate-y-1/2 translate-x-1/4 opacity-30"></div>
           <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-700 rounded-full translate-y-1/2 -translate-x-1/4 opacity-30"></div>
           <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -508,7 +587,7 @@ export default function Home() {
                 placeholder="Your email address"
                 className="flex-grow px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white/10 backdrop-blur-sm text-white border border-white/20"
               />
-              <Button className="bg-amber-400 h-10 hover:bg-amber-500 text-teal-950 font-medium transition-all hover:shadow-lg ">
+              <Button className="bg-amber-400 h-10 hover:bg-amber-500 text-teal-950 font-medium transition-all hover:shadow-lg">
                 Subscribe
               </Button>
             </div>
@@ -518,7 +597,7 @@ export default function Home() {
         {/* Community Guidelines */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Community Guidelines</h2>
-          <div className="bg-teal-950 rounded-lg p-6">
+          <div className="bg-teal-950 rounded-lg p-6 shadow-lg border border-teal-900/50">
             <div className="flex items-center mb-4">
               <Users className="h-6 w-6 mr-2 text-teal-500" />
               <h3 className="font-bold text-white">Our Community Standards</h3>
@@ -561,171 +640,326 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-teal-950 p-8 text-gray-300">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-white text-lg mb-4">MediStore</h3>
-              <p className="mb-4">
-                Your trusted partner for all healthcare needs. We provide quality medicines and healthcare products with
-                expert guidance.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-white hover:text-teal-400 transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fillRule="evenodd"
-                      d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </a>
-                <a href="#" className="text-white hover:text-teal-400 transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fillRule="evenodd"
-                      d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </a>
-                <a href="#" className="text-white hover:text-teal-400 transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </a>
-              </div>
+      <footer className="bg-teal-950 text-gray-300 w-full relative">
+      
+
+      {/* Main Footer Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          {/* Company Info */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Image
+                src="https://img.icons8.com/arcade/64/hospital.png"
+                alt="MediStore Logo"
+                width={40}
+                height={40}
+                className="rounded-md"
+              />
+              <h3 className="font-bold text-white text-xl">MediStore</h3>
             </div>
-            <div>
-              <h3 className="font-bold text-white text-lg mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/about" className="hover:text-teal-400 transition-colors">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products" className="hover:text-teal-400 transition-colors">
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/services" className="hover:text-teal-400 transition-colors">
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-teal-400 transition-colors">
-                    Health Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-teal-400 transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-lg mb-4">Categories</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/products/medicines" className="hover:text-teal-400 transition-colors">
-                    Medicines
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products/devices" className="hover:text-teal-400 transition-colors">
-                    Medical Devices
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products/personal-care" className="hover:text-teal-400 transition-colors">
-                    Personal Care
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products/baby-care" className="hover:text-teal-400 transition-colors">
-                    Baby Care
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products/nutrition" className="hover:text-teal-400 transition-colors">
-                    Nutrition & Supplements
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-lg mb-4">Contact Us</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <span>123 Health Street, Medical District, City - 123456</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                  <span>+91 1234567890</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span>support@MediStore.com</span>
-                </li>
-              </ul>
+            <p className="mb-6 text-gray-300 leading-relaxed">
+              Your trusted partner for all healthcare needs. We provide quality medicines and healthcare products with
+              expert guidance, serving millions of customers since 2020.
+            </p>
+            <div className="flex space-x-3">
+              <a
+                href="#"
+                className="text-white hover:text-teal-400 transition-colors p-2 bg-teal-900 hover:bg-teal-800 rounded-full"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-teal-400 transition-colors p-2 bg-teal-900 hover:bg-teal-800 rounded-full"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-teal-400 transition-colors p-2 bg-teal-900 hover:bg-teal-800 rounded-full"
+                aria-label="Twitter"
+              >
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-teal-400 transition-colors p-2 bg-teal-900 hover:bg-teal-800 rounded-full"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                className="text-white hover:text-teal-400 transition-colors p-2 bg-teal-900 hover:bg-teal-800 rounded-full"
+                aria-label="YouTube"
+              >
+                <Youtube className="h-5 w-5" />
+              </a>
             </div>
           </div>
-          <div className="border-t border-gray-700 pt-6">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p>&copy; 2025 MediStore. All rights reserved.</p>
-              <div className="flex space-x-6 mt-4 md:mt-0">
-                <Link href="/terms" className="hover:text-teal-400 transition-colors">
-                  Terms of Service
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-bold text-white text-lg mb-6 relative after:content-[''] after:absolute after:w-12 after:h-1 after:bg-teal-500 after:left-0 after:-bottom-2">
+              Quick Links
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/about" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  About Us
                 </Link>
-                <Link href="/privacy" className="hover:text-teal-400 transition-colors">
-                  Privacy Policy
+              </li>
+              <li>
+                <Link href="/products" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Products
                 </Link>
-                <Link href="/shipping" className="hover:text-teal-400 transition-colors">
-                  Shipping Policy
+              </li>
+              <li>
+                <Link href="/services" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Services
                 </Link>
-                <Link href="/refund" className="hover:text-teal-400 transition-colors">
-                  Refund Policy
+              </li>
+              <li>
+                <Link href="/blog" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Health Blog
                 </Link>
-              </div>
-            </div>
-            <p className="text-sm mt-4 text-center">
-              Disclaimer: The information provided on this website is for general informational purposes only and is not
-              intended as a substitute for professional medical advice, diagnosis, or treatment.
-            </p>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  FAQs
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Categories */}
+          <div>
+            <h3 className="font-bold text-white text-lg mb-6 relative after:content-[''] after:absolute after:w-12 after:h-1 after:bg-teal-500 after:left-0 after:-bottom-2">
+              Categories
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/products/medicines" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Medicines
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/devices" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Medical Devices
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products/personal-care"
+                  className="hover:text-teal-400 transition-colors flex items-center"
+                >
+                  <span className="text-teal-500 mr-2">›</span>
+                  Personal Care
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/baby-care" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Baby Care
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/nutrition" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Nutrition & Supplements
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/wellness" className="hover:text-teal-400 transition-colors flex items-center">
+                  <span className="text-teal-500 mr-2">›</span>
+                  Wellness
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="font-bold text-white text-lg mb-6 relative after:content-[''] after:absolute after:w-12 after:h-1 after:bg-teal-500 after:left-0 after:-bottom-2">
+              Contact Us
+            </h3>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <MapPin className="h-6 w-6 mr-3 text-teal-500 flex-shrink-0 mt-0.5" />
+                <span>123 Health Street, Medical District, City - 123456</span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-6 w-6 mr-3 text-teal-500 flex-shrink-0" />
+                <a href="tel:+911234567890" className="hover:text-teal-400 transition-colors">
+                  +91 1234567890
+                </a>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-6 w-6 mr-3 text-teal-500 flex-shrink-0" />
+                <a href="mailto:support@medistore.com" className="hover:text-teal-400 transition-colors">
+                  support@medistore.com
+                </a>
+              </li>
+              <li className="flex items-center">
+                <Clock className="h-6 w-6 mr-3 text-teal-500 flex-shrink-0" />
+                <span>24/7 Customer Support</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </footer>
+
+        {/* Trust Badges & Certifications */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <h4 className="text-center text-lg font-semibold mb-6 text-white">Why Choose MediStore</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            <div className="flex flex-col items-center justify-center space-y-2 p-4 rounded-lg bg-teal-900/30 hover:bg-teal-900/50 transition-colors">
+              <Shield className="h-10 w-10 text-teal-500 mb-1" />
+              <span className="text-white font-medium">Licensed Pharmacy</span>
+              <p className="text-xs text-gray-400">Fully compliant with regulations</p>
+            </div>
+            <div className="flex flex-col items-center justify-center space-y-2 p-4 rounded-lg bg-teal-900/30 hover:bg-teal-900/50 transition-colors">
+              <Award className="h-10 w-10 text-teal-500 mb-1" />
+              <span className="text-white font-medium">ISO 9001 Certified</span>
+              <p className="text-xs text-gray-400">Quality management system</p>
+            </div>
+            <div className="flex flex-col items-center justify-center space-y-2 p-4 rounded-lg bg-teal-900/30 hover:bg-teal-900/50 transition-colors">
+              <Truck className="h-10 w-10 text-teal-500 mb-1" />
+              <span className="text-white font-medium">Express Delivery</span>
+              <p className="text-xs text-gray-400">Fast & reliable shipping</p>
+            </div>
+            <div className="flex flex-col items-center justify-center space-y-2 p-4 rounded-lg bg-teal-900/30 hover:bg-teal-900/50 transition-colors">
+              <CreditCard className="h-10 w-10 text-teal-500 mb-1" />
+              <span className="text-white font-medium">Secure Payments</span>
+              <p className="text-xs text-gray-400">Multiple payment options</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Partners */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <h4 className="text-center text-lg font-semibold mb-6 text-white">Payment Partners</h4>
+          <div className="flex justify-center space-x-4 sm:space-x-6 flex-wrap gap-y-4">
+            <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                alt="Visa"
+                className="h-6 sm:h-8"
+              />
+            </div>
+            <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                alt="Mastercard"
+                className="h-6 sm:h-8"
+              />
+            </div>
+            <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
+                alt="PayPal"
+                className="h-6 sm:h-8"
+              />
+            </div>
+            <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_Pay_logo.svg"
+                alt="Apple Pay"
+                className="h-6 sm:h-8"
+              />
+            </div>
+            <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/8/89/Google_Pay_logo.svg"
+                alt="Google Pay"
+                className="h-6 sm:h-8"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* App Download Section */}
+        <div className="border-t border-gray-800 pt-8 mb-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <div className="text-center md:text-left">
+              <h4 className="text-lg font-semibold text-white mb-2">Download Our Mobile App</h4>
+              <p className="text-gray-400 max-w-md">Get exclusive app-only offers and manage your orders on the go</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a href="#" className="transition-transform hover:scale-105">
+                <Image
+                  src="/placeholder.svg?height=50&width=150"
+                  alt="Download on App Store"
+                  width={150}
+                  height={50}
+                  className="rounded-md"
+                />
+              </a>
+              <a href="#" className="transition-transform hover:scale-105">
+                <Image
+                  src="/placeholder.svg?height=50&width=150"
+                  alt="Get it on Google Play"
+                  width={150}
+                  height={50}
+                  className="rounded-md"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Footer */}
+        <div className="border-t border-gray-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+            <p className="mb-4 md:mb-0">&copy; {new Date().getFullYear()} MediStore. All rights reserved.</p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <Link href="/terms" className="hover:text-teal-400 transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/privacy" className="hover:text-teal-400 transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/shipping" className="hover:text-teal-400 transition-colors">
+                Shipping Policy
+              </Link>
+              <Link href="/refund" className="hover:text-teal-400 transition-colors">
+                Refund Policy
+              </Link>
+            </div>
+          </div>
+          <p className="text-sm text-center text-gray-400 mt-6">
+            Disclaimer: The information provided on this website is for general informational purposes only and is not
+            intended as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of
+            your physician or other qualified health provider with any questions you may have regarding a medical
+            condition.
+          </p>
+        </div>
+      </div>
+
+      {/* Back to top button */}
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-6 right-6 bg-teal-600 hover:bg-teal-500 text-white p-3 rounded-full shadow-lg transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-teal-950 z-50"
+        aria-label="Back to top"
+      >
+        <ChevronUp className="h-5 w-5" />
+      </button>
+    </footer>
     </div>
   )
 }
