@@ -1,14 +1,15 @@
 "use client"
 
 import React from "react"
-import { useState, useEffect, useRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, useRef, Suspense } from "react"
+import { useRouter } from "next/navigation"
 import { Stethoscope, Users, Send, Mic, MicOff } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
-export default function ChatPage() {
+// Create a client component that safely uses useSearchParams
+function ChatContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [isListening, setIsListening] = useState(false)
   const [messages, setMessages] = useState([
     {
@@ -25,85 +26,92 @@ export default function ChatPage() {
   const inputRef = useRef(null)
   const recognitionRef = useRef(null)
   const messageProcessedRef = useRef(false)
-
-  // Process any message passed via URL query parameter
+  
+  // We'll use URL parsing directly instead of useSearchParams to avoid Suspense issues
   useEffect(() => {
-    const messageFromQuery = searchParams?.get("message")
-    const source = searchParams?.get("source")
-    
-    // Only process the message if it hasn't been processed yet
-    if (messageFromQuery && !messageProcessedRef.current) {
-      addMessage(messageFromQuery, "user")
-      messageProcessedRef.current = true
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const messageFromQuery = params.get("message");
+      const source = params.get("source");
       
-      // If the message is from navbar, we don't want to start speech recognition immediately
-      if (source === "navbar") {
-        // Add a delay before allowing speech recognition to start again
-        const timer = setTimeout(() => {
-          messageProcessedRef.current = false
-        }, 2000)
+      // Only process the message if it hasn't been processed yet and it exists
+      if (messageFromQuery && !messageProcessedRef.current) {
+        addMessage(messageFromQuery, "user");
+        messageProcessedRef.current = true;
         
-        return () => clearTimeout(timer)
+        // If the message is from navbar, we don't want to start speech recognition immediately
+        if (source === "navbar") {
+          // Add a delay before allowing speech recognition to start again
+          const timer = setTimeout(() => {
+            messageProcessedRef.current = false;
+          }, 2000);
+          
+          return () => clearTimeout(timer);
+        }
       }
     }
-  }, [searchParams])
+  }, []);
 
-  // Initialize speech recognition
+  // Initialize speech recognition with safer browser checks
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // @ts-ignore
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      try {
+        // @ts-ignore
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null
 
-      if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition()
-        recognitionInstance.continuous = true
-        recognitionInstance.interimResults = true
-        recognitionInstance.lang = 'en-US'
-        
-        let finalTranscript = ''
-        let interimTranscript = ''
-        
-        recognitionInstance.onstart = () => {
-          setIsListening(true)
-          finalTranscript = ''
-          interimTranscript = ''
-        }
+        if (SpeechRecognition) {
+          const recognitionInstance = new SpeechRecognition()
+          recognitionInstance.continuous = true
+          recognitionInstance.interimResults = true
+          recognitionInstance.lang = 'en-US'
+          
+          let finalTranscript = ''
+          let interimTranscript = ''
+          
+          recognitionInstance.onstart = () => {
+            setIsListening(true)
+            finalTranscript = ''
+            interimTranscript = ''
+          }
 
-        recognitionInstance.onresult = (event) => {
-          // Don't process speech if we just processed a URL message
-          if (messageProcessedRef.current) return
-          
-          interimTranscript = ''
-          
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript
+          recognitionInstance.onresult = (event) => {
+            // Don't process speech if we just processed a URL message
+            if (messageProcessedRef.current) return
             
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript + ' '
-              setInput(finalTranscript.trim())
-            } else {
-              interimTranscript += transcript
-              setInput(finalTranscript + interimTranscript)
+            interimTranscript = ''
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const transcript = event.results[i][0].transcript
+              
+              if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' '
+                setInput(finalTranscript.trim())
+              } else {
+                interimTranscript += transcript
+                setInput(finalTranscript + interimTranscript)
+              }
             }
           }
-        }
 
-        recognitionInstance.onend = () => {
-          setIsListening(false)
-          
-          // If we have a final transcript and user stopped manually (not auto-submit)
-          if (finalTranscript.trim() && inputRef.current && !messageProcessedRef.current) {
-            inputRef.current.focus()
+          recognitionInstance.onend = () => {
+            setIsListening(false)
+            
+            // If we have a final transcript and user stopped manually (not auto-submit)
+            if (finalTranscript.trim() && inputRef.current && !messageProcessedRef.current) {
+              inputRef.current.focus()
+            }
           }
-        }
 
-        recognitionInstance.onerror = (event) => {
-          console.error("Speech recognition error", event.error)
-          setIsListening(false)
-        }
+          recognitionInstance.onerror = (event) => {
+            console.error("Speech recognition error", event.error)
+            setIsListening(false)
+          }
 
-        setRecognition(recognitionInstance)
-        recognitionRef.current = recognitionInstance
+          setRecognition(recognitionInstance)
+          recognitionRef.current = recognitionInstance
+        }
+      } catch (error) {
+        console.error("Speech recognition not supported in this browser", error)
       }
     }
     
@@ -124,6 +132,8 @@ export default function ChatPage() {
   }, [messages, isTyping])
 
   const addMessage = (content, role) => {
+    if (!content || !content.trim()) return;
+    
     const newMessage = {
       id: Date.now().toString(),
       content,
@@ -167,7 +177,7 @@ export default function ChatPage() {
         ) {
           response =
             "I'll redirect you to our medical store where you can browse and order medicines and medical supplies."
-          redirectPath = "https://medical-store-bice.vercel.app/"
+          redirectPath = "/medical-store" // Updated to relative path
         } else if (lowerContent.includes("service") || lowerContent.includes("offer")) {
           response = "Let me show you the services we offer at MediNexus."
           redirectPath = "/#services"
@@ -187,7 +197,8 @@ export default function ChatPage() {
         if (redirectPath) {
           setTimeout(() => {
             if (redirectPath.startsWith("http")) {
-              window.location.href = redirectPath
+              // For external links, open in a new tab for better UX
+              window.open(redirectPath, "_blank", "noopener,noreferrer")
             } else {
               router.push(redirectPath)
             }
@@ -205,25 +216,37 @@ export default function ChatPage() {
       
       // Stop listening if active
       if (isListening && recognition) {
-        recognition.stop()
+        try {
+          recognition.stop()
+        } catch (error) {
+          console.error("Error stopping speech recognition:", error)
+        }
       }
     }
   }
 
   const toggleVoiceRecognition = () => {
-    if (!recognition) return
+    if (!recognition) {
+      console.warn("Speech recognition not available in this browser")
+      return
+    }
 
-    if (isListening) {
-      recognition.stop()
-    } else {
-      // Don't start if we just processed a URL message
-      if (messageProcessedRef.current) {
-        messageProcessedRef.current = false
-        return
+    try {
+      if (isListening) {
+        recognition.stop()
+      } else {
+        // Don't start if we just processed a URL message
+        if (messageProcessedRef.current) {
+          messageProcessedRef.current = false
+          return
+        }
+        
+        setInput("")
+        recognition.start()
       }
-      
-      setInput("")
-      recognition.start()
+    } catch (error) {
+      console.error("Error toggling speech recognition:", error)
+      setIsListening(false)
     }
   }
 
@@ -233,7 +256,15 @@ export default function ChatPage() {
       <header className="flex justify-between items-center px-6 py-3 bg-teal-900/70 border-b border-teal-700/30">
         <Link href="/" className="cursor-pointer">
           <div className="flex items-center space-x-2">
-            <img src="https://img.icons8.com/arcade/64/hospital.png" alt="MediNexus Logo" className="h-10 w-10" />
+            <div className="relative h-10 w-10">
+              <Image 
+                src="/icons/hospital.png" 
+                alt="MediNexus Logo"
+                width={40}
+                height={40}
+                priority
+              />
+            </div>
             <div className="text-lg font-bold text-teal-400">MediStore Assistant</div>
           </div>
         </Link>
@@ -341,7 +372,31 @@ export default function ChatPage() {
           <Send size={20} />
         </button>
       </form>
-
     </div>
-  )
+  );
+}
+
+// Add a loading component
+function ChatLoading() {
+  return (
+    <div className="h-screen flex items-center justify-center bg-gradient-to-b from-teal-950 to-black">
+      <div className="text-teal-400 text-center">
+        <div className="flex space-x-2 justify-center items-center">
+          <div className="h-4 w-4 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+          <div className="h-4 w-4 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+          <div className="h-4 w-4 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+        </div>
+        <p className="mt-4">Loading chat assistant...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<ChatLoading />}>
+      <ChatContent />
+    </Suspense>
+  );
 }
