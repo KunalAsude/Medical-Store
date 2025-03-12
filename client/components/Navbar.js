@@ -77,13 +77,6 @@ const transformCategories = (categories) => {
 export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
-
-  // Check if we're on the chat page first, before any other hooks
-  // are initialized
-  if (pathname === "/chat") {
-    return null
-  }
-
   const [openCategory, setOpenCategory] = useState(null)
   const [categories, setCategories] = useState([])
   const { getCartItemCount } = useCart()
@@ -93,6 +86,9 @@ export default function Navbar() {
   const [isListening, setIsListening] = useState(false)
   const [recognition, setRecognition] = useState(null)
   const [transcript, setTranscript] = useState("")
+
+  // Check if we're on the chat page
+  const isOnChatPage = pathname === "/chat"
 
   useEffect(() => {
     const get = async () => {
@@ -213,6 +209,11 @@ export default function Navbar() {
       animation: float 3s ease-in-out infinite;
     }
   `
+
+  // If we're on the chat page, don't render the navbar
+  if (isOnChatPage) {
+    return null
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-b-gray-900 bg-teal-950 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -553,9 +554,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Only show "Listening..." indicator, not the transcript */}
+   
       {isListening && <div className="md:hidden bg-teal-900 p-2 text-teal-300 text-sm text-center">Listening...</div>}
     </header>
   )
 }
-
