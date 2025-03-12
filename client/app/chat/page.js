@@ -258,7 +258,7 @@ function ChatContent() {
           <div className="flex items-center space-x-2">
             <div className="relative h-10 w-10">
               <Image 
-                src="/icons/hospital.png" 
+                src="https://img.icons8.com/arcade/64/hospital.png" 
                 alt="MediNexus Logo"
                 width={40}
                 height={40}

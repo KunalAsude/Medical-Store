@@ -23,6 +23,7 @@ import {
   MessageSquare,
   Mic,
   MicOff,
+  Search,
 } from "lucide-react"
 import Image from "next/image"
 import {
@@ -86,6 +87,7 @@ export default function Navbar() {
   const [isListening, setIsListening] = useState(false)
   const [recognition, setRecognition] = useState(null)
   const [transcript, setTranscript] = useState("")
+  const [activeCategory, setActiveCategory] = useState(null)
 
   // Check if we're on the chat page
   const isOnChatPage = pathname === "/chat"
@@ -251,31 +253,75 @@ export default function Navbar() {
                 <Stethoscope className="h-4 w-4 mr-2" />
                 Categories
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-teal-900 rounded-lg shadow-lg border-0 w-full">
-                <div className="grid w-[600px] grid-cols-2 p-4 gap-4">
-                  {categories.map((category) => (
-                    <div key={category._id} className="group relative">
-                      <Link
-                        href={`/category/${category._id}`}
-                        className="block p-3 rounded-md hover:bg-teal-800 transition-colors text-white font-medium group-hover:bg-teal-800"
-                      >
-                        {category.name}
-                      </Link>
-                      {category.subcategories.length > 0 && (
-                        <div className="pl-4 mt-1 space-y-1  group-hover:opacity-100 transition-opacity">
-                          {category.subcategories.map((subcategory) => (
-                            <Link
-                              key={subcategory._id}
-                              href={`/category/${subcategory._id}`}
-                              className="block py-1.5 px-3 text-sm text-gray-300 hover:text-white hover:bg-teal-800 rounded-md transition-colors"
-                            >
-                              {subcategory.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+              <NavigationMenuContent className="bg-teal-900 rounded-lg shadow-lg border-0">
+                <div className="flex p-1 w-[600px]">
+                  {/* Left sidebar with main categories */}
+                  <div className="w-1/3 border-r border-teal-800">
+                    <ul className="py-2">
+                      {categories.map((category) => (
+                        <li key={category._id}>
+                          <button
+                            className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
+                              activeCategory === category._id
+                                ? "bg-teal-800 text-white"
+                                : "text-gray-200 hover:bg-teal-800/50"
+                            } transition-colors rounded-l-md`}
+                            onMouseEnter={() => setActiveCategory(category._id)}
+                            onClick={() => router.push(`/category/${category._id}`)}
+                          >
+                            {category.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Right panel with subcategories */}
+                  <div className="w-2/3 p-4">
+                    {activeCategory ? (
+                      <>
+                        {categories.find((c) => c._id === activeCategory)?.subcategories.length > 0 ? (
+                          <div className="space-y-4">
+                            <h3 className="font-medium text-teal-300 mb-3">
+                              {categories.find((c) => c._id === activeCategory)?.name}
+                            </h3>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                              {categories
+                                .find((c) => c._id === activeCategory)
+                                ?.subcategories.map((subcategory) => (
+                                  <Link
+                                    key={subcategory._id}
+                                    href={`/category/${subcategory._id}`}
+                                    className="text-sm text-gray-200 hover:text-teal-300 py-1.5 transition-colors"
+                                  >
+                                    {subcategory.name}
+                                  </Link>
+                                ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-400 text-sm">No subcategories available</p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <Search className="h-8 w-8 text-teal-500 mb-2 opacity-50" />
+                        <p className="text-gray-300">Hover over a category to see subcategories</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-teal-950/50 p-3 flex justify-between items-center">
+                  <Link href="/categories" className="text-xs text-teal-400 hover:text-teal-300 flex items-center">
+                    View all categories
+                    <ChevronRight className="h-3 w-3 ml-1" />
+                  </Link>
+                  <Link href="/products" className="text-xs text-teal-400 hover:text-teal-300 flex items-center">
+                    Browse all products
+                    <ChevronRight className="h-3 w-3 ml-1" />
+                  </Link>
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
@@ -554,8 +600,8 @@ export default function Navbar() {
         </div>
       </div>
 
-   
       {isListening && <div className="md:hidden bg-teal-900 p-2 text-teal-300 text-sm text-center">Listening...</div>}
     </header>
   )
 }
+
