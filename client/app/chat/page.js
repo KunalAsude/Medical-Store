@@ -47,6 +47,10 @@ function ChatContent() {
       if (messageFromQuery && !messageProcessedRef.current) {
         addMessage(messageFromQuery, "user")
         messageProcessedRef.current = true
+        
+        // Remove the query parameters from the URL without a page reload
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
 
         // If the message is from navbar, we don't want to start speech recognition immediately
         if (source === "navbar") {
@@ -443,4 +447,3 @@ export default function ChatPage() {
     </Suspense>
   )
 }
-

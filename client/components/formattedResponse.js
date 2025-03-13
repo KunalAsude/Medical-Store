@@ -63,15 +63,29 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
     )
   }
 
-  const renderList = (items = [], section) => {
-    if (!items || !items.length) return null
+  // Clean list items to remove numbering and asterisks
+  const cleanListItems = (items = []) => {
+    if (!items || !items.length) return [];
+    
+    return items.map(item => 
+      item.replace(/^\s*\*\s*/, '')  // Remove asterisks
+           .replace(/^\s*\d+\.\s*/, '')  // Remove numbering
+           .trim()
+    );
+  }
 
+  const renderList = (items = [], section) => {
+    if (!items || !items.length) return null;
+
+    // Clean the items to remove numbering and asterisks
+    const cleanedItems = cleanListItems(items);
+    
     const showAll = expandedSections[section]
-    const displayItems = showAll ? items : items.slice(0, mobileItemsToShow)
+    const displayItems = showAll ? cleanedItems : cleanedItems.slice(0, mobileItemsToShow)
 
     return (
       <>
-        <ul className="space-y-1 pl-4">
+        <ul className="space-y-1.5 pl-4">
           {displayItems.map((item, index) => (
             <li key={index} className="list-disc text-teal-100 leading-tight text-sm">
               {item}
@@ -79,7 +93,7 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
           ))}
         </ul>
 
-        {renderToggleButton(section, items.length, mobileItemsToShow)}
+        {renderToggleButton(section, cleanedItems.length, mobileItemsToShow)}
       </>
     )
   }
@@ -105,10 +119,10 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
       : cleanSummary
     
     return (
-      <div className="mb-2 pb-2 border-b border-teal-800/40">
-        <div className="flex items-center gap-1 mb-1">
+      <div className="mb-3 pb-2 border-b border-teal-800/40">
+        <div className="flex items-center gap-1.5 mb-1.5">
           <div className="bg-teal-900/60 p-1 rounded-md">
-            <Info className="h-3 w-3 text-teal-400" />
+            <Info className="h-3.5 w-3.5 text-teal-400" />
           </div>
           <span className="font-medium text-teal-300 text-sm">Summary</span>
         </div>
@@ -120,16 +134,16 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
   }
 
   return (
-    <div className="space-y-3 text-teal-100 p-3 bg-teal-950/40 rounded-lg border border-teal-900/60 shadow-md">
+    <div className="space-y-4 text-teal-100 p-4 bg-teal-950/40 rounded-lg border border-teal-900/60 shadow-md">
       {/* Summary Section */}
       {summarySectionRenderer()}
 
       {/* Symptoms Section */}
       {data.symptoms && data.symptoms.length > 0 && (
-        <div className="mb-2">
-          <div className="flex items-center gap-1 mb-1">
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-red-900/30 p-1 rounded-md">
-              <Thermometer className="h-3 w-3 text-red-400" />
+              <Thermometer className="h-3.5 w-3.5 text-red-400" />
             </div>
             <span className="font-medium text-teal-300 text-sm">Key Symptoms</span>
           </div>
@@ -139,10 +153,10 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
 
       {/* Remedies Section */}
       {data.remedies && data.remedies.length > 0 && (
-        <div className="mb-2">
-          <div className="flex items-center gap-1 mb-1">
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-green-900/30 p-1 rounded-md">
-              <Stethoscope className="h-3 w-3 text-green-400" />
+              <Stethoscope className="h-3.5 w-3.5 text-green-400" />
             </div>
             <span className="font-medium text-teal-300 text-sm">Home Remedies</span>
           </div>
@@ -153,9 +167,9 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
       {/* Precautions Section */}
       {data.precautions && data.precautions.length > 0 && (
         <div>
-          <div className="flex items-center gap-1 mb-1">
+          <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-blue-900/30 p-1 rounded-md">
-              <ShieldCheck className="h-3 w-3 text-blue-400" />
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />
             </div>
             <span className="font-medium text-teal-300 text-sm">Precautions</span>
           </div>
