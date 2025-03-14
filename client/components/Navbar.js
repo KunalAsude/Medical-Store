@@ -41,18 +41,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { getAllCategories } from "@/lib/actions/categoryActions"
-
-// Import the HoverCard components
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar"
 import { useCart } from "@/context/CartContext"
 import { getCurrentUser, logoutUser } from "@/lib/actions/authActions"
 
-// Data transformation function
+// Data transformation function for categories
 const transformCategories = (categories) => {
   const categoryMap = {}
 
-  // Create a map of categories
   categories.forEach((category) => {
     if (!category.parentCategory) {
       categoryMap[category._id] = {
@@ -62,7 +59,6 @@ const transformCategories = (categories) => {
     }
   })
 
-  // Add subcategories to their parent categories
   categories.forEach((category) => {
     if (category.parentCategory) {
       if (categoryMap[category.parentCategory]) {
@@ -71,7 +67,6 @@ const transformCategories = (categories) => {
     }
   })
 
-  // Convert the map back to an array
   return Object.values(categoryMap)
 }
 
@@ -88,6 +83,7 @@ export default function Navbar() {
   const [recognition, setRecognition] = useState(null)
   const [transcript, setTranscript] = useState("")
   const [activeCategory, setActiveCategory] = useState(null)
+  const [speechError, setSpeechError] = useState("")
 
   // Check if we're on the chat page
   const isOnChatPage = pathname === "/chat"
@@ -95,7 +91,6 @@ export default function Navbar() {
   useEffect(() => {
     const get = async () => {
       const userData = await getCurrentUser()
-      console.log("User Data", userData)
       if (userData) {
         setUser(userData)
         setIsAuthenticated(true)
@@ -112,55 +107,54 @@ export default function Navbar() {
     setCartItemCount(getCartItemCount())
   }, [getCartItemCount])
 
-  // Speech recognition setup
+  // Speech recognition setup with mobile optimizations
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Check if browser supports SpeechRecognition
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
       if (SpeechRecognition) {
         const recognitionInstance = new SpeechRecognition()
-        recognitionInstance.continuous = false // Ensure it stops after one result
-        recognitionInstance.interimResults = false // Only get final results to prevent multiple outputs
-        recognitionInstance.lang = "en-US" // Set language explicitly
+        recognitionInstance.continuous = false 
+        recognitionInstance.interimResults = false
+        recognitionInstance.lang = "en-US"
 
         recognitionInstance.onstart = () => {
-          console.log("Speech recognition started")
           setIsListening(true)
+          setSpeechError("")
         }
 
         recognitionInstance.onresult = (event) => {
           const current = event.resultIndex
           const transcriptText = event.results[current][0].transcript
-          console.log("Speech recognized:", transcriptText)
-
-          // Set the transcript state
           setTranscript(transcriptText)
-
-          // Handle the voice input and redirect
+          
+          // Store transcript in sessionStorage for cross-page persistence
           if (transcriptText.trim()) {
-            // Use router.push with a callback to ensure navigation completes
-            console.log("Redirecting to chat with:", transcriptText)
-            router.push(`/chat?message=${encodeURIComponent(transcriptText)}&source=navbar`)
+            sessionStorage.setItem('speechTranscript', transcriptText)
           }
         }
 
         recognitionInstance.onend = () => {
-          console.log("Speech recognition ended")
           setIsListening(false)
+          
+          // Handle navigation after recognition completes
+          const storedTranscript = sessionStorage.getItem('speechTranscript')
+          if (storedTranscript) {
+            sessionStorage.removeItem('speechTranscript')
+            // Use direct window location for more reliable mobile navigation
+            window.location.href = `/chat?message=${encodeURIComponent(storedTranscript)}&source=navbar`
+          }
         }
 
         recognitionInstance.onerror = (event) => {
-          console.error("Speech recognition error", event.error)
+          setSpeechError(event.error)
           setIsListening(false)
         }
 
         setRecognition(recognitionInstance)
-      } else {
-        console.warn("Speech Recognition is not supported in this browser")
       }
     }
-  }, [router])
+  }, [])
 
   const toggleCategory = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName)
@@ -177,25 +171,31 @@ export default function Navbar() {
     logout()
   }
 
-  // Handle chat button click - redirect to chat page
-  const handleChatClick = () => {
-    router.push("/chat")
-  }
-
-  // Toggle listening function
-  const toggleListening = () => {
+  // Enhanced toggle listening function with permission handling
+  const toggleListening = async () => {
     if (recognition) {
       if (isListening) {
         recognition.stop()
       } else {
         try {
+          // Request microphone permission explicitly
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            await navigator.mediaDevices.getUserMedia({ audio: true })
+          }
+          
+          // Clear any previous transcripts
+          sessionStorage.removeItem('speechTranscript')
+          setTranscript("")
+          
+          // Start recognition
           recognition.start()
         } catch (error) {
+          setSpeechError("Permission denied")
           console.error("Error starting speech recognition:", error)
         }
       }
     } else {
-      console.warn("Speech recognition not available")
+      setSpeechError("Not supported")
     }
   }
 
