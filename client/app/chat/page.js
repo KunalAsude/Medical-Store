@@ -9,7 +9,6 @@ import Image from "next/image"
 import axios from "axios"
 import { FormattedMedicalResponse } from "@/components/formattedResponse"
 
-
 // API URL from environment variable with fallback
 const API_URL = process.env.NEXT_PUBLIC_CHAT_API_URL || "http://localhost:8000"
 
@@ -31,10 +30,29 @@ function ChatContent() {
   const [recognition, setRecognition] = useState(null)
   const [isTyping, setIsTyping] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const recognitionRef = useRef(null)
   const messageProcessedRef = useRef(false)
+
+  // Detect mobile screen on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    
+    // Check on mount
+    if (typeof window !== "undefined") {
+      checkMobile()
+      
+      // Set up listener for resize
+      window.addEventListener('resize', checkMobile)
+      
+      // Cleanup
+      return () => window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
 
   // We'll use URL parsing directly instead of useSearchParams to avoid Suspense issues
   useEffect(() => {
@@ -285,10 +303,10 @@ function ChatContent() {
   return (
     <div className="h-screen flex flex-col bg-gradient-to-b from-teal-950 to-black overflow-hidden">
       {/* Header - Static */}
-      <header className="flex justify-between items-center px-6 py-3 bg-teal-900/70 border-b border-teal-700/30">
+      <header className="flex justify-between items-center px-4 sm:px-6 py-3 bg-teal-900/70 border-b border-teal-700/30">
         <Link href="/" className="cursor-pointer">
           <div className="flex items-center space-x-2">
-            <div className="relative h-10 w-10">
+            <div className="relative h-8 w-8 sm:h-10 sm:w-10">
               <Image
                 src="https://img.icons8.com/arcade/64/hospital.png"
                 alt="MediNexus Logo"
@@ -297,7 +315,7 @@ function ChatContent() {
                 priority
               />
             </div>
-            <div className="text-lg font-bold text-teal-400">MediStore Assistant</div>
+            <div className="text-base sm:text-lg font-bold text-teal-400">MediStore Assistant</div>
           </div>
         </Link>
 
@@ -308,13 +326,13 @@ function ChatContent() {
             aria-label={isListening ? "Stop listening" : "Start voice assistant"}
             disabled={isProcessing}
           >
-            {isListening ? <MicOff size={20} className="text-red-400" /> : <Mic size={20} className="text-teal-300" />}
+            {isListening ? <MicOff size={18} className="text-red-400" /> : <Mic size={18} className="text-teal-300" />}
           </button>
         </div>
       </header>
 
       {/* Chat Messages - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
+      <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-2 space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
             {message.role === "assistant" && (
@@ -322,18 +340,20 @@ function ChatContent() {
                 <Stethoscope size={16} className="text-white" />
               </div>
             )}
-            <div className="flex flex-col max-w-[75%]">
+            <div className={`flex flex-col ${isMobile ? "max-w-[85%]" : "max-w-[75%]"}`}>
               <div
                 className={`p-3 rounded-lg shadow-md ${
                   message.role === "user"
                     ? "bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-br-none"
                     : "bg-gradient-to-r from-teal-900 to-teal-950 border border-teal-700/50 text-teal-100 rounded-bl-none"
-                }`}
+                } ${message.isFormatted ? "w-full" : ""}`}
               >
                 {message.isFormatted && message.formattedData ? (
-                  <FormattedMedicalResponse data={message.formattedData} />
+                  <FormattedMedicalResponse data={message.formattedData} initialItemsToShow={isMobile ? 2 : 3} />
                 ) : (
-                  formatMessageContent(message.content)
+                  <div className="text-sm sm:text-base">
+                    {formatMessageContent(message.content)}
+                  </div>
                 )}
               </div>
               <div className={`text-xs mt-1 text-teal-400/70 ${message.role === "user" ? "text-right" : "text-left"}`}>

@@ -13,23 +13,20 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
   })
   const [isMobile, setIsMobile] = useState(false)
 
-  // Detect mobile screen on mount and window resize
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640)
     }
-    
-    // Check on mount
+
     checkMobile()
     
-    // Set up listener for resize
+
     window.addEventListener('resize', checkMobile)
     
-    // Cleanup
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Adjust initial items based on screen size
   const mobileItemsToShow = isMobile ? 2 : initialItemsToShow
 
   if (data.error) {
@@ -43,7 +40,7 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
     }))
   }
 
-  // Used for both summary and lists
+
   const renderToggleButton = (section, itemCount, initialCount) => {
     const showAll = expandedSections[section]
     const hasMore = itemCount > initialCount
@@ -57,28 +54,33 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
         onClick={() => toggleSection(section)}
         className="text-teal-400 hover:text-teal-300 hover:bg-teal-950/50 mt-1 h-6 px-2 w-full flex justify-between text-xs"
       >
-        <span>{showAll ? "Show less" : `Show more`}</span>
+        <span>{showAll ? "Show less" : `Show ${itemCount - initialCount} more`}</span>
         {showAll ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
       </Button>
     )
   }
 
-  // Clean list items to remove numbering and asterisks
   const cleanListItems = (items = []) => {
     if (!items || !items.length) return [];
     
-    return items.map(item => 
-      item.replace(/^\s*\*\s*/, '')  // Remove asterisks
-           .replace(/^\s*\d+\.\s*/, '')  // Remove numbering
-           .trim()
-    );
+ 
+    return items.filter(item => {
+      const cleaned = item.replace(/^\s*\*\s*/, '')  
+                         .replace(/^\s*\d+\.\s*/, '')  
+                         .trim();
+      return cleaned.length > 1; 
+    });
   }
 
   const renderList = (items = [], section) => {
     if (!items || !items.length) return null;
 
-    // Clean the items to remove numbering and asterisks
     const cleanedItems = cleanListItems(items);
+    
+
+    if (cleanedItems.length === 0) {
+      return <p className="text-teal-300 italic text-sm">Information not available</p>;
+    }
     
     const showAll = expandedSections[section]
     const displayItems = showAll ? cleanedItems : cleanedItems.slice(0, mobileItemsToShow)
@@ -98,25 +100,30 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
     )
   }
 
-  // Process summary for mobile optimization
+  
   const summarySectionRenderer = () => {
     if (!data.summary) return null
     
-    // Remove any markdown and normalize
     const cleanSummary = data.summary
       .replace(/\*\*Brief Summary:\*\*\s*/g, "")
       .replace(/\*\*Summary:\*\*\s*/g, "")
       .trim()
     
-    // Split into sentences for truncation on mobile
-    const sentences = cleanSummary.split(/(?<=[.!?])\s+/)
-    const isLongSummary = sentences.length > 2
+    const lastChar = cleanSummary.slice(-1);
+    const hasCompleteEnding = ['.', '!', '?'].includes(lastChar);
     
-    // Show fewer sentences on mobile
+    const displaySummary = hasCompleteEnding ? 
+      cleanSummary : 
+      cleanSummary + '...';
+    
+    
+    const sentences = displaySummary.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+    const isLongSummary = sentences.length > 2
+
     const showAll = expandedSections.summary
-    const displaySummary = (isMobile && isLongSummary && !showAll) 
-      ? sentences.slice(0, 2).join(' ') 
-      : cleanSummary
+    const truncatedSummary = (isMobile && isLongSummary && !showAll) 
+      ? sentences.slice(0, 2).join(' ') + (sentences.length > 2 ? '...' : '')
+      : displaySummary
     
     return (
       <div className="mb-3 pb-2 border-b border-teal-800/40">
@@ -126,20 +133,26 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
           </div>
           <span className="font-medium text-teal-300 text-sm">Summary</span>
         </div>
-        <p className="text-teal-100 leading-relaxed text-sm">{displaySummary}</p>
+        <p className="text-teal-100 leading-relaxed text-sm">{truncatedSummary}</p>
         
         {isMobile && isLongSummary && renderToggleButton('summary', sentences.length, 2)}
       </div>
     )
   }
 
+  // Check if there's any actual content to display
+  const hasSymptoms = data.symptoms && cleanListItems(data.symptoms).length > 0;
+  const hasRemedies = data.remedies && cleanListItems(data.remedies).length > 0;
+  const hasPrecautions = data.precautions && cleanListItems(data.precautions).length > 0;
+  const hasSummary = Boolean(data.summary);
+
   return (
-    <div className="space-y-4 text-teal-100 p-4 bg-teal-950/40 rounded-lg border border-teal-900/60 shadow-md">
+    <div className="space-y-4 text-teal-100 p-3 sm:p-4 bg-teal-950/40 rounded-lg border border-teal-900/60 shadow-md">
       {/* Summary Section */}
       {summarySectionRenderer()}
 
       {/* Symptoms Section */}
-      {data.symptoms && data.symptoms.length > 0 && (
+      {hasSymptoms && (
         <div className="mb-3">
           <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-red-900/30 p-1 rounded-md">
@@ -152,7 +165,7 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
       )}
 
       {/* Remedies Section */}
-      {data.remedies && data.remedies.length > 0 && (
+      {hasRemedies && (
         <div className="mb-3">
           <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-green-900/30 p-1 rounded-md">
@@ -165,7 +178,7 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
       )}
 
       {/* Precautions Section */}
-      {data.precautions && data.precautions.length > 0 && (
+      {hasPrecautions && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <div className="bg-blue-900/30 p-1 rounded-md">
@@ -177,7 +190,7 @@ export const FormattedMedicalResponse = ({ data, initialItemsToShow = 3 }) => {
         </div>
       )}
 
-      {!data.summary && !data.symptoms?.length && !data.remedies?.length && !data.precautions?.length && (
+      {!hasSummary && !hasSymptoms && !hasRemedies && !hasPrecautions && (
         <div className="text-teal-300 italic text-center py-2 text-sm">
           I couldn't find specific information about that. Would you like to ask about something else?
         </div>
