@@ -873,42 +873,42 @@ export default function Home() {
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
                   alt="Visa"
-                  className="h-6 sm:h-8"
+                  className="h-6 sm:h-8 w-20"
                 />
               </div>
               <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
                   alt="Mastercard"
-                  className="h-6 sm:h-8"
+                  className="h-6 sm:h-8 w-20"
                 />
               </div>
               <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
                   alt="PayPal"
-                  className="h-6 sm:h-8"
+                  className="h-6 sm:h-8 w-20"
                 />
               </div>
               <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_Pay_logo.svg"
+                  src="https://www.svgrepo.com/show/303191/apple-pay-logo.svg"
                   alt="Apple Pay"
-                  className="h-6 sm:h-8"
+                  className="h-6 sm:h-8 w-20"
                 />
               </div>
               <div className="bg-white p-2 rounded-md hover:shadow-md transition-all">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/8/89/Google_Pay_logo.svg"
+                  src="https://res.cloudinary.com/kunalstorage/image/upload/v1742060995/google-pay-primary-logo-logo_qw6x2j.svg"
                   alt="Google Pay"
-                  className="h-6 sm:h-8"
+                  className="h-6 sm:h-8 w-20"
                 />
               </div>
             </div>
           </div>
 
           {/* App Download Section */}
-          <div className="border-t border-gray-800 pt-8 mb-8">
+          <div className="border-t border-gray-800 pt-0 sm:mt-0 mb-0">
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
               <div className="text-center md:text-left">
                 <h4 className="text-lg font-semibold text-white mb-2">Download Our Mobile App</h4>
@@ -917,20 +917,20 @@ export default function Home() {
               <div className="flex flex-wrap justify-center gap-4">
                 <a href="#" className="transition-transform hover:scale-105">
                   <Image
-                    src="/placeholder.svg?height=50&width=150"
+                    src="https://www.svgrepo.com/show/303128/download-on-the-app-store-apple-logo.svg"
                     alt="Download on App Store"
                     width={150}
-                    height={50}
-                    className="rounded-md"
+                    height={80}
+                    className="rounded-md "
                   />
                 </a>
                 <a href="#" className="transition-transform hover:scale-105">
                   <Image
-                    src="/placeholder.svg?height=50&width=150"
+                    src="https://www.svgrepo.com/show/303455/get-it-on-google-play-logo.svg"
                     alt="Get it on Google Play"
                     width={150}
                     height={50}
-                    className="rounded-md"
+                    className="rounded-md h-32 p-2"
                   />
                 </a>
               </div>
