@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 // Ensure API_URL has a fallback value
 const API_URL = process.env.NEXT_PUBLIC_API_URL_CHAT || "http://localhost:5001"
 
-export default function Home() {
+function ChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [input, setInput] = useState("")
@@ -367,9 +367,6 @@ export default function Home() {
 
   return (
     <>
-    <Suspense fallback={<p>Loading...</p>}>
-      <div>Chat Page</div>
-    </Suspense>
     <div className="flex flex-col bg-cyan-900 w-full h-screen border-0 shadow-none rounded-none">
       <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-cyan-800 flex items-center gap-2">
         <Bot size={18} className="text-cyan-300 size-8" />
@@ -504,3 +501,11 @@ export default function Home() {
   )
 }
 
+
+export default function Home() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <ChatContent />
+    </Suspense>
+  );
+}
