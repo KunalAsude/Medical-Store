@@ -104,42 +104,34 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
+    const { isValid, errors: validationErrors } = validateForm(formData);
+  
+    if (!isValid) {
+      setErrors(validationErrors);
+      return;
+    }
+  
     setIsLoading(true);
-    
+  
     try {
-      // Use the registerUser function
       const result = await registerUser(formData);
-      console.log("result", result);
-      
-      if (result && result.user) {
+  
+      if (result && result.success) {
         // Successful registration
-        console.log('Registration successful', result.user);
-        
-        // Store user info and tokens in localStorage for later use
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(result.user));
-          
-          // Store tokens if available
-          if (result.tokens) {
-            localStorage.setItem('accessToken', result.tokens.accessToken);
-            localStorage.setItem('refreshToken', result.tokens.refreshToken);
-          }
+        localStorage.setItem('user', JSON.stringify(result.user));
+        if (result.tokens) {
+          localStorage.setItem('accessToken', result.tokens.accessToken);
+          localStorage.setItem('refreshToken', result.tokens.refreshToken);
         }
-        
-        // Redirect to home or dashboard
         router.push('/');
       } else {
-        // Handle registration failure
-        setErrors({
-          submit: result?.message || "Registration failed"
-        });
+        // Registration failed
+        setErrors({ submit: result.message || 'Registration failed' });
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({
-        submit: "An unexpected error occurred"
-      });
+      setErrors({ submit: 'An unexpected error occurred' });
     } finally {
       setIsLoading(false);
     }

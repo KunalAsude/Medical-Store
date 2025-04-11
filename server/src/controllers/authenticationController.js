@@ -15,22 +15,31 @@ class AuthController {
         address 
       } = req.body;
 
+      console.log("Registration request received:", JSON.stringify({
+        firstName, lastName, email, phoneNumber, address
+      }));
+
       // Validate input
       if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ 
-          message: 'Please provide all required fields' 
+          message: 'Please provide all required fields: firstName, lastName, email, password', 
+          requiredFields: ['firstName', 'lastName', 'email', 'password']
         });
       }
 
       // Check if user already exists
-      const existingUser = await User.findOne({ 
-        $or: [{ email }, { phoneNumber }] 
-      });
+      const existingUserQuery = { email };
+      if (phoneNumber) {
+        existingUserQuery.$or = [{ email }, { phoneNumber }]; 
+      }
+      
+      const existingUser = await User.findOne(existingUserQuery);
 
       if (existingUser) {
+        const field = existingUser.email === email ? 'email' : 'phoneNumber';
         return res.status(400).json({ 
-          message: 'User already exists',
-          field: existingUser.email === email ? 'email' : 'phoneNumber'
+          message: `User with this ${field} already exists`,
+          field
         });
       }
 
@@ -64,6 +73,8 @@ class AuthController {
         }
       });
     } catch (error) {
+      console.error("Registration error:", error);
+      
       // Handle validation errors
       if (error.name === 'ValidationError') {
         const errors = Object.values(error.errors).map(err => ({
@@ -139,6 +150,7 @@ class AuthController {
         }
       });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ 
         message: 'Login failed', 
         error: error.message 
@@ -146,24 +158,25 @@ class AuthController {
     }
   }
 
-    // User Logout
-    static async logout(req, res) {
-        try {
-          // Clear authentication cookie
-          res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
-          });
-    
-          res.status(200).json({ message: 'Logged out successfully' });
-        } catch (error) {
-          res.status(500).json({ 
-            message: 'Logout failed', 
-            error: error.message 
-          });
-        }
-      }    
+  // User Logout
+  static async logout(req, res) {
+    try {
+      // Clear authentication cookie
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None'
+      });
+  
+      res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ 
+        message: 'Logout failed', 
+        error: error.message 
+      });
+    }
+  }    
 
   // Refresh Token
   static async refreshToken(req, res) {
@@ -203,6 +216,7 @@ class AuthController {
         refreshToken: newRefreshToken
       });
     } catch (error) {
+      console.error("Token refresh error:", error);
       res.status(500).json({ 
         message: 'Token refresh failed', 
         error: error.message 
@@ -214,6 +228,12 @@ class AuthController {
   static async forgotPassword(req, res) {
     try {
       const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          message: 'Email is required'
+        });
+      }
 
       // Find user
       const user = await User.findOne({ email });
@@ -242,6 +262,7 @@ class AuthController {
         message: 'Password reset instructions sent' 
       });
     } catch (error) {
+      console.error("Password reset request error:", error);
       res.status(500).json({ 
         message: 'Error processing password reset', 
         error: error.message 
@@ -254,6 +275,12 @@ class AuthController {
     try {
       const { token } = req.params;
       const { newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({
+          message: 'Token and new password are required'
+        });
+      }
 
       // Find user with valid reset token
       const user = await User.findOne({ 
@@ -278,6 +305,7 @@ class AuthController {
         message: 'Password reset successful' 
       });
     } catch (error) {
+      console.error("Password reset error:", error);
       res.status(500).json({ 
         message: 'Error resetting password', 
         error: error.message 
@@ -332,6 +360,8 @@ class AuthController {
         user: updatedUserResponse
       });
     } catch (error) {
+      console.error("Profile update error:", error);
+      
       // Handle validation errors
       if (error.name === 'ValidationError') {
         const errors = Object.values(error.errors).map(err => ({
@@ -352,8 +382,5 @@ class AuthController {
     }
   }
 }
-
-
-
 
 export default AuthController;

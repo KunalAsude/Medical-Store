@@ -199,6 +199,10 @@ export default function Navbar() {
     }
   }
 
+  const handleMedinexus=()=>{
+    window.location.href="https://www.medinexus.in/"
+  }
+
   // Float animation for chat button
   const floatAnimation = `
     @keyframes float {
@@ -231,7 +235,7 @@ export default function Navbar() {
               className="rounded-md"
             />
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-teal-400 hidden sm:inline-block">MediStore</span>
+              <span className="font-bold text-xl text-teal-400 hidden sm:inline-block" onClick={handleMedinexus}>MediStore</span>
             </div>
           </Link>
         </div>

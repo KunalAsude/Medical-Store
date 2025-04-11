@@ -129,3 +129,5 @@ export class AuthMiddleware {
   static strictRateLimiter = this.rateLimiter(50, 15 * 60 * 1000); // 50 requests per 15 minutes
   static heavyRateLimiter = this.rateLimiter(200, 15 * 60 * 1000); // 200 requests per 15 minutes
 }
+
+

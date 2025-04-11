@@ -3,12 +3,14 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit"
 
 // Import routes
 import productRoutes from "./src/routes/productRoutes.js";
 import categoryRoutes from "./src/routes/categoryRoutes.js";
 import uploadRoutes from "./src/routes/uploadRoutes.js";
 import router from "./src/routes/authenticationRoutes.js";
+import paymentrouter from './src/routes/paymentRoutes.js'
 
 
 
@@ -25,6 +27,15 @@ app.use(cors({
   origin: [process.env.FRONTEND_URL || 'http://localhost:3000', 'https://medical-store-bice.vercel.app'],
   credentials: true
 }));
+
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests, please try again later.",
+});
+
+app.use(limiter);
 
 // Database Connection
 const connectDB = async () => {
@@ -46,6 +57,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/auth",router);
+app.use("/api/payment",paymentrouter)
 
 // Global Error Handler
 app.use((err, req, res, next) => {
