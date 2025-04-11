@@ -31,11 +31,13 @@ export const registerUser = async (userData) => {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        phoneNumber: userData.phoneNumber,
+        phoneNumber: userData.phoneNumber || undefined,
         password: userData.password,
-        address: userData.address,
-        acceptTerms: userData.acceptTerms
+        address: userData.address || undefined,
       };
+      
+      // Log the payload for debugging
+      console.log("Registration payload:", JSON.stringify(payload));
   
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
         method: 'POST',
@@ -45,22 +47,48 @@ export const registerUser = async (userData) => {
         body: JSON.stringify(payload)
       });
   
-      if (!res.ok) {
-        const errorData = await res.json();
+      // Log the full response for debugging
+      console.log("Registration response status:", res.status);
+      console.log("Registration response headers:", Object.fromEntries([...res.headers]));
+      
+      // Check if the response is JSON
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const responseData = await res.json();
+        
+        
+        if (!res.ok) {
+          return {
+            success: false,
+            message: responseData.message || "Registration failed",
+            errors: responseData.errors
+          };
+        }
+        
+        // If registration successful, store tokens and user data
+        if (responseData.tokens) {
+          setAuthTokens(responseData.tokens);
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user', JSON.stringify(responseData.user));
+          }
+        }
+        
+        return {
+          success: true,
+          user: responseData.user,
+          tokens: responseData.tokens,
+          message: responseData.message || "Registration successful"
+        };
+      } else {
+        // Handle non-JSON response
+        const textResponse = await res.text();
+        console.error("Non-JSON response:", textResponse);
         return {
           success: false,
-          message: errorData.message || "Registration failed"
+          message: "Server returned invalid response format"
         };
       }
-  
-      const result = await res.json();
-      
-      return {
-        success: true,
-        user: result.user,
-        tokens: result.tokens,
-        message: result.message || "Registration successful"
-      };
     } catch (error) {
       console.error("Error registering user:", error);
       return {
@@ -68,7 +96,7 @@ export const registerUser = async (userData) => {
         message: error.message || "Registration failed"
       };
     }
-  };
+};
 
 /**
  * Login user
@@ -87,35 +115,42 @@ export const loginUser = async (credentials) => {
             body: JSON.stringify(credentials)
         });
        
+        const responseData = await res.json();
 
         if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || "Login failed");
+            console.error("Login error details:", responseData);
+            return {
+                success: false,
+                message: responseData.message || "Login failed"
+            };
         }
 
-        const result = await res.json();
-        console.log("Login Response", result);
+        console.log("Login Response", responseData);
 
         // Store tokens and user info
-        if (result.tokens) {
-            setAuthTokens(result.tokens);
+        if (responseData.tokens) {
+            setAuthTokens(responseData.tokens);
 
             if (typeof window !== 'undefined') {
-                localStorage.setItem('user', JSON.stringify(result.user));
+                localStorage.setItem('user', JSON.stringify(responseData.user));
             }
         }
 
-        return result;
+        return {
+            success: true,
+            user: responseData.user,
+            tokens: responseData.tokens,
+            message: responseData.message || "Login successful"
+        };
     } catch (error) {
         console.error("Error logging in:", error);
-        return null;
+        return {
+            success: false,
+            message: error.message || "Login failed"
+        };
     }
 };
 
-/**
- * Logout user
- * @returns Boolean indicating success of logout
- */
 /**
  * Logout user
  * @returns Boolean indicating success of logout
@@ -181,11 +216,11 @@ export const getCurrentUser = () => {
 /**
  * Request password reset
  * @param email User's email address
- * @returns Boolean indicating success of password reset request
+ * @returns Object with success status and message
  */
 export const requestPasswordReset = async (email) => {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -193,10 +228,18 @@ export const requestPasswordReset = async (email) => {
             body: JSON.stringify({ email })
         });
 
-        return res.ok;
+        const responseData = await res.json();
+        
+        return {
+            success: res.ok,
+            message: responseData.message || (res.ok ? "Password reset instructions sent" : "Failed to send reset instructions")
+        };
     } catch (error) {
         console.error("Error requesting password reset:", error);
-        return false;
+        return {
+            success: false,
+            message: error.message || "Failed to send reset instructions"
+        };
     }
 };
 
@@ -204,49 +247,142 @@ export const requestPasswordReset = async (email) => {
  * Reset password
  * @param token Password reset token
  * @param newPassword New password
- * @returns Boolean indicating success of password reset
+ * @returns Object with success status and message
  */
 export const resetPassword = async (token, newPassword) => {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password/confirm`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password/${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ token, newPassword })
+            body: JSON.stringify({ newPassword })
         });
 
-        return res.ok;
+        const responseData = await res.json();
+        
+        return {
+            success: res.ok,
+            message: responseData.message || (res.ok ? "Password reset successful" : "Failed to reset password")
+        };
     } catch (error) {
         console.error("Error resetting password:", error);
-        return false;
+        return {
+            success: false,
+            message: error.message || "Failed to reset password"
+        };
     }
 };
 
 /**
  * Update user profile
  * @param userData User profile update data
- * @returns Updated user object or null if update fails
+ * @returns Object with success status, updated user data, and message
  */
 export const updateUserProfile = async (userData) => {
     try {
+        const token = getAccessToken();
+        
+        if (!token) {
+            return {
+                success: false,
+                message: "Authentication required"
+            };
+        }
+        
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            credentials: 'include',
             body: JSON.stringify(userData)
         });
 
+        const responseData = await res.json();
+
         if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || "Profile update failed");
+            console.error("Profile update error details:", responseData);
+            return {
+                success: false,
+                message: responseData.message || "Profile update failed",
+                errors: responseData.errors
+            };
         }
 
-        return await res.json();
+        // Update the stored user data
+        if (responseData.user && typeof window !== 'undefined') {
+            localStorage.setItem('user', JSON.stringify(responseData.user));
+        }
+
+        return {
+            success: true,
+            user: responseData.user,
+            message: responseData.message || "Profile updated successfully"
+        };
     } catch (error) {
         console.error("Error updating user profile:", error);
-        return null;
+        return {
+            success: false,
+            message: error.message || "Profile update failed"
+        };
+    }
+};
+
+/**
+ * Refresh the access token using the refresh token
+ * @returns Object with success status and new tokens
+ */
+export const refreshAuthToken = async () => {
+    try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        if (!refreshToken) {
+            return {
+                success: false,
+                message: "No refresh token available"
+            };
+        }
+        
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken })
+        });
+
+        const responseData = await res.json();
+
+        if (!res.ok) {
+            console.error("Token refresh error:", responseData);
+            // If refresh fails, user needs to login again
+            clearAuthTokens();
+            return {
+                success: false,
+                message: responseData.message || "Session expired, please login again"
+            };
+        }
+
+        // Update stored tokens
+        if (responseData.accessToken && responseData.refreshToken) {
+            setAuthTokens({
+                accessToken: responseData.accessToken,
+                refreshToken: responseData.refreshToken
+            });
+        }
+
+        return {
+            success: true,
+            message: "Token refreshed successfully"
+        };
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        // On error, clear tokens and require re-login
+        clearAuthTokens();
+        return {
+            success: false,
+            message: error.message || "Authentication failed, please login again"
+        };
     }
 };

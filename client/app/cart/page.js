@@ -68,7 +68,48 @@ const CartContent = () => {
               <div className="overflow-y-auto max-h-[50vh] lg:max-h-[60vh] mb-3 sm:mb-5 pr-2 -mr-2 flex-grow">
                 <div className="divide-y">
                   {items.map((item) => (
-                    <CartItem key={item._id} item={item} onUpdateQuantity={updateQuantity} onRemove={removeFromCart} />
+                    <div key={item._id} className="py-4 sm:py-6 first:pt-0 last:pb-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4">
+                          <Link href={`/products/${item._id}`}>
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                            />
+                          </Link>
+                          <div className="flex-1">
+                            <Link href={`/products/${item._id}`} className="font-medium hover:text-primary transition-colors">
+                              {item.name}
+                            </Link>
+                            <div className="text-sm text-gray-500 mt-1">
+                              ₹{item.price.toFixed(2)}
+                            </div>
+                            <button 
+                              onClick={() => removeFromCart(item._id)}
+                              className="text-xs text-red-500 hover:text-red-700 transition-colors mt-2"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => updateQuantity(item._id, Math.max(1, item.quantity - 1))}
+                            className="flex items-center justify-center w-8 h-8 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100"
+                          >
+                            -
+                          </button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                            className="flex items-center justify-center w-8 h-8 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -133,4 +174,3 @@ const CartPage = () => {
 
 export { CartPage, CartContent, CartLoading }
 export default CartPage
-
