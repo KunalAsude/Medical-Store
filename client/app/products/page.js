@@ -18,9 +18,24 @@ export default function ProductsPage() {
   })
   const [sortOption, setSortOption] = useState("popularity")
 
+  // Fetch products when filters or sort option change
   useEffect(() => {
-    getAllProducts().then((data) => setProducts(data));
-  }, []);
+    const fetchProducts = async () => {
+      const filterParams = {};
+      if (filters.brands && filters.brands.length > 0) filterParams.brand = filters.brands[0];
+      if (filters.priceRanges && filters.priceRanges.length > 0) {
+        // Assume priceRanges is a string like "0-100", "100-500", etc.
+        const [min, max] = filters.priceRanges[0].split('-');
+        if (min) filterParams.minPrice = min;
+        if (max) filterParams.maxPrice = max;
+      }
+      // Add category filter if needed
+      // if (filters.subcategories && filters.subcategories.length > 0) filterParams.category = filters.subcategories[0];
+      const data = await getAllProducts(filterParams);
+      setProducts(sortProducts(data, sortOption));
+    };
+    fetchProducts();
+  }, [filters, sortOption]);
 
   const handleFilterChange = (type, value) => {
     setFilters((prev) => {
@@ -49,7 +64,12 @@ export default function ProductsPage() {
         // In a real app, you would sort by date
         return sortedProducts
       default: // popularity
-        return sortedProducts
+        // Sort by averageRating (desc), then reviewCount (desc)
+        return sortedProducts.sort((a, b) => {
+          const ratingDiff = (b.averageRating || 0) - (a.averageRating || 0);
+          if (ratingDiff !== 0) return ratingDiff;
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        })
     }
   }
 
@@ -76,9 +96,9 @@ export default function ProductsPage() {
             value={filters.brands[0] || ""}
           >
             <option value="">All Brands</option>
-            {products?.map((product) => (
-              <option key={product?.brand} value={product?.brand}>
-                {product?.brand}
+            {[...new Set(products.map((product) => product?.brand))].map((brand, idx) => (
+              <option key={brand + '-' + idx} value={brand}>
+                {brand}
               </option>
             ))}
           </select>
@@ -101,11 +121,11 @@ export default function ProductsPage() {
             value={filters.priceRanges[0] || ""}
           >
             <option value="">Any Price</option>
-            {products?.priceRanges?.map((range) => (
-              <option key={range.id} value={range.id}>
-                {range.label}
-              </option>
-            ))}
+            {/* Example price ranges */}
+            <option value="0-100">₹0 - ₹100</option>
+            <option value="100-500">₹100 - ₹500</option>
+            <option value="500-1000">₹500 - ₹1000</option>
+            <option value="1000-5000">₹1000 - ₹5000</option>
           </select>
         </div>
       </div>
@@ -191,16 +211,19 @@ export default function ProductsPage() {
         {/* Products Grid */}
         {products && products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                id={product._id}
-                name={product.name}
-                price={product.price}
-                image={product?.images[0]?.url}
-                category={product?.brand}
-              />
-            ))}
+            {products.map((product) => {
+              const imageUrl = product?.images && product.images[0] && typeof product.images[0].url === 'string' && product.images[0].url.trim() !== '' ? product.images[0].url : "/placeholder.svg";
+              return (
+                <ProductCard
+                  key={product._id}
+                  id={product._id}
+                  name={product.name}
+                  price={product.price}
+                  image={imageUrl}
+                  category={product?.brand}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">

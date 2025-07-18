@@ -26,7 +26,7 @@ export default function CartItem({ item }) {
       {/* Product Image */}
       <div className="relative h-20 w-20 flex-shrink-0">
         <Image
-          src={item.image || "/placeholder.svg"}
+          src={item.image && typeof item.image === 'string' && item.image.trim() !== '' ? item.image : "/placeholder.svg"}
           alt={item.name}
           fill
           className="object-contain"
