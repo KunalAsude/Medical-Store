@@ -10,7 +10,22 @@ const router = express.Router();
  */
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find();
+    const { brand, minPrice, maxPrice, category } = req.query;
+    const filter = {};
+
+    if (brand) {
+      filter.brand = brand;
+    }
+    if (category) {
+      filter.categories = category;
+    }
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const products = await Product.find(filter);
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Error fetching products", error });

@@ -58,6 +58,13 @@ const Checkout = () => {
       if (!user) {
         // Redirect to login page if the user is not logged in
         router.push("/auth/login");
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          fullName: user.name || "",
+          email: user.email || "",
+          phone: user.phone || ""
+        }));
       }
     };
 
@@ -123,7 +130,7 @@ const Checkout = () => {
       }
 
       const options = {
-        key: "rzp_test_wXGUwYgfrOjdRQ",
+        key: "rzp_test_9arMjW7QUI0T5A",
         amount: order.amount,
         currency: order.currency,
         name: formData.fullName,
@@ -145,7 +152,7 @@ const Checkout = () => {
           if (verifyData.success) {
             alert("Payment Successful!");
             
-            router.push("/");
+            router.push("/checkout/success");
             clearCart();
           } else {
             alert("Payment Verification Failed!");
@@ -181,7 +188,15 @@ const Checkout = () => {
                 {["fullName", "email", "phone", "address", "city", "state", "zipCode"].map((field) => (
                   <div key={field} className="space-y-2">
                     <Label htmlFor={field}>{field.replace(/([A-Z])/g, " $1").trim()}</Label>
-                    <Input id={field} name={field} value={formData[field]} onChange={handleChange} placeholder={`Enter your ${field}`} />
+                    <Input
+                      id={field}
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      placeholder={`Enter your ${field}`}
+                      readOnly={["fullName", "email", "phone"].includes(field) && formData[field]}
+                      required={["address", "city", "state", "zipCode"].includes(field)}
+                    />
                   </div>
                 ))}
                 <div className="space-y-2">

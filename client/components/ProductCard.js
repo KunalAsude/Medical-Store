@@ -86,12 +86,12 @@ export default function ProductCard({
             {/* Image container */}
             <div className="relative overflow-hidden h-[180px] w-full">
               <Image
-                src={image || "/placeholder.svg"}
+                src={image && typeof image === 'string' && image.trim() !== '' ? image : "/placeholder.svg"}
                 alt={name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover "
-                priority={false}
+                priority={!(image && typeof image === 'string' && image.trim() !== '')}
               />
               
               {/* Category badge */}
