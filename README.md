@@ -163,41 +163,6 @@ MediNexus-MedicalStore/
 
 ## API Documentation
 
-### AI Recommendations Endpoint
-
-**POST** `/api/ai/ask`
-
-```json
-{
-  "prompt": "I have a headache and mild fever",
-  "userAge": 25,
-  "existingMedications": []
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "recommendations": [
-    {
-      "product": "Paracetamol 500mg",
-      "reason": "Effective for fever reduction and headache relief",
-      "dosage": "1-2 tablets every 4-6 hours",
-      "maxDaily": "8 tablets per day",
-      "warnings": ["Do not exceed maximum daily dose", "Avoid alcohol"]
-    }
-  ]
-}
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ### Development Guidelines
 - Follow TypeScript best practices
